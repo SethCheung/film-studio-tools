@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目时间线 - Timeline Manager</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: #f8f8f8; min-height: 100vh; color: #1a1a1a; font-size: 14px; line-height: 1.5; }
+
+/* ---- Header ---- */
+.header { background: rgba(255,255,255,0.92); backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid rgba(0,0,0,0.06); padding: 0 32px; height: 56px; position: sticky; top: 0; z-index: 100; }
+.header-content { max-width: 100%; display: flex; justify-content: space-between; align-items: center; height: 100%; }
+.header h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: #1a1a1a; }
+
+/* ---- Buttons ---- */
+.btn { height: 32px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-secondary { background: rgba(0,0,0,0.05); color: #1a1a1a; }
+.btn-secondary:hover { background: rgba(0,0,0,0.08); }
+.btn-primary { background: #1a1a1a; color: #fff; }
+.btn-primary:hover { background: #333; }
+
+/* ---- Main Layout ---- */
+.main-container { display: grid; grid-template-columns: 272px 1fr; height: calc(100vh - 56px); overflow: hidden; }
+
+/* ---- Sidebar ---- */
+.sidebar { background: #fafafa; border-right: 1px solid rgba(0,0,0,0.06); padding: 24px 16px; overflow-y: auto; }
+.sidebar h2 { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #9a9a9a; margin-bottom: 12px; padding: 0 8px; }
+.project-item { padding: 10px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 2px; transition: background 0.1s; }
+.project-item:hover { background: rgba(0,0,0,0.04); }
+.project-item.active { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04); }
+.project-item h3 { font-size: 13px; font-weight: 500; color: #1a1a1a; margin-bottom: 2px; }
+.project-item p { font-size: 11px; color: #aaa; line-height: 1.4; }
+.project-item .proj-meta { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.proj-tag { display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 20px; font-size: 10px; font-weight: 500; }
+
+/* ---- Content Area ---- */
+.content-container { background: #f8f8f8; padding: 28px 32px; overflow-y: auto; height: 100%; }
+.content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.content-header h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; color: #1a1a1a; }
+
+/* ---- View Tabs ---- */
+.view-tabs { display: flex; gap: 4px; margin-bottom: 24px; background: rgba(0,0,0,0.04); padding: 4px; border-radius: 10px; width: fit-content; }
+.view-tab { padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: #888; transition: all 0.15s; }
+.view-tab:hover { color: #1a1a1a; }
+.view-tab.active { background: #fff; color: #1a1a1a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+/* ---- Calendar Navigation ---- */
+.nav-btn { width: 32px; height: 32px; border-radius: 8px; border: none; background: rgba(0,0,0,0.05); cursor: pointer; font-size: 14px; color: #666; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+.nav-btn:hover { background: rgba(0,0,0,0.1); color: #1a1a1a; }
+
+/* ---- Calendar Layout ---- */
+.cal-wrap { width: 100%; }
+.cal-nav { display: flex; justify-content: center; align-items: center; margin-bottom: 16px; }
+.cal-title { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: #1a1a1a; }
+.cal-3col { display: grid; grid-template-columns: 160px 1fr 160px; gap: 12px; align-items: start; }
+.cal-col-side { }
+.cal-col-main { position: relative; }
+.cal-prev-btn, .cal-next-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); background: #fff; cursor: pointer; font-size: 12px; color: #555; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); transition: all 0.15s; }
+.cal-prev-btn:hover, .cal-next-btn:hover { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.cal-prev-btn { left: -17px; }
+.cal-next-btn { right: -17px; }
+.cal-box.side { cursor: pointer; transition: opacity 0.2s, transform 0.15s; border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); opacity: 0.6; }
+.cal-box.side:hover { opacity: 0.85; transform: translateY(-1px); }
+.cal-box.side:active { opacity: 0.5; }
+.cal-box.center { box-shadow: 0 2px 16px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.08); }
+.cal-box { background: #fff; border-radius: 14px; overflow: hidden; border: 1px solid rgba(0,0,0,0.07); }
+.cal-hdr { padding: 14px 16px; text-align: center; font-size: 13px; font-weight: 600; color: #555; background: #fafafa; border-bottom: 1px solid rgba(0,0,0,0.05); letter-spacing: -0.01em; }
+.cal-box.center .cal-hdr { background: #1a1a1a; color: #fff; border-bottom: none; font-size: 15px; padding: 16px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.wd { padding: 8px 4px; text-align: center; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; color: #c0c0c0; border-bottom: 1px solid rgba(0,0,0,0.04); background: #fafafa; }
+.wd:first-child { color: #e0e0e0; }
+.wd:last-child { color: #b0b0e0; }
+.day { min-height: 52px; border-right: 1px solid rgba(0,0,0,0.04); border-bottom: 1px solid rgba(0,0,0,0.04); padding: 5px; position: relative; background: #fff; transition: background 0.15s; }
+.day:nth-child(7n) { border-right: none; }
+.center .day { min-height: 88px; padding: 6px; }
+.dnum { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; font-size: 12px; font-weight: 500; color: #444; transition: all 0.15s; }
+.center .dnum { width: 30px; height: 30px; font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.day.wk { background: #f5f7ff; }
+.day.wk .dnum { color: #3b5bdb; font-weight: 600; }
+.day.hd { background: #fff5f5; }
+.day.hd .dnum { color: #e03131; font-weight: 600; }
+.day.old { opacity: 0.3; }
+.day.old .dnum { color: #bbb; }
+.day.today .dnum { background: #1a1a1a; color: #fff; font-weight: 600; }
+.hlbl { position: absolute; top: 4px; right: 4px; font-size: 9px; font-weight: 600; padding: 1px 4px; border-radius: 4px; line-height: 1.4; background: #e03131; color: #fff; }
+.center .hlbl { font-size: 10px; padding: 2px 5px; top: 5px; right: 5px; }
+.hlbl.wk { background: #3b5bdb; }
+.ebar { position: absolute; left: 5px; right: 5px; height: 18px; border-radius: 5px; font-size: 10px; color: #fff; display: flex; align-items: center; padding: 0 6px; overflow: hidden; white-space: nowrap; cursor: grab; font-weight: 500; letter-spacing: -0.01em; transition: transform 0.15s, opacity 0.15s; }
+.center .ebar { left: 6px; right: 6px; height: 20px; font-size: 11px; }
+.ebar:hover { opacity: 0.85; transform: scaleY(1.1); }
+.side .ebar { display: none; }
+.day.drag-over { background: rgba(59,91,219,0.06); outline: 2px dashed rgba(59,91,219,0.4); outline-offset: -2px; }
+
+/* ---- Timeline View ---- */
+.timeline-view { display: none; overflow-x: auto; padding: 12px 4px 28px; }
+.timeline-view.active { display: block; }
+.tl-wrap { position: relative; }
+.tl-axis { position: relative; height: 3px; background: #e8e8ed; border-radius: 2px; margin: 32px 0 28px; }
+.tl-nodes { display: flex; align-items: flex-start; position: relative; }
+.tl-node { flex: 1; position: relative; padding: 0 10px; }
+.tl-node:first-child { padding-left: 0; }
+.tl-node:last-child { padding-right: 0; }
+.tl-node-top { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
+.tl-dot { width: 12px; height: 12px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px var(--dot-color, #007aff); background: var(--dot-color, #007aff); flex-shrink: 0; position: relative; z-index: 2; transition: transform 0.15s; }
+.tl-dot.completed { background: #34c759; box-shadow: 0 0 0 2px #34c759; }
+.tl-dot.in-progress { background: #ff9500; box-shadow: 0 0 0 2px #ff9500; animation: pulse-dot 2s infinite; }
+.tl-dot.upcoming { background: #e8e8ed; box-shadow: 0 0 0 2px #d1d1d6; }
+@keyframes pulse-dot { 0%,100% { box-shadow: 0 0 0 2px #ff9500; } 50% { box-shadow: 0 0 0 5px rgba(255,149,0,0.25); } }
+.tl-date { font-size: 11px; color: #9a9a9e; margin-top: 6px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap; }
+.tl-node-bottom { background: #fff; border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 10px 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: box-shadow 0.15s; }
+.tl-node-bottom:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.tl-node-name { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; letter-spacing: -0.01em; line-height: 1.3; }
+.tl-node-dept { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600; margin-bottom: 5px; }
+.tl-node-leader { font-size: 11px; color: #9a9a9e; display: flex; align-items: center; gap: 3px; }
+.tl-node-actions { display: flex; gap: 5px; margin-top: 8px; }
+.tl-node-actions button { flex: 1; padding: 5px; border-radius: 6px; border: none; cursor: pointer; font-size: 11px; font-weight: 500; transition: background 0.15s; }
+.tl-edit-btn { background: #f5f5f7; color: #1a1a1a; }
+.tl-edit-btn:hover { background: #e8e8ed; }
+.tl-del-btn { background: #fff0f0; color: #e03131; }
+.tl-del-btn:hover { background: #ffe0e0; }
+.tl-connector { position: absolute; top: 6px; left: 50%; width: 100%; height: 2px; background: #e8e8ed; z-index: 1; }
+.tl-empty-axis { text-align: center; padding: 60px 40px; color: #aaa; font-size: 14px; }
+
+/* ---- Gantt View ---- */
+.gantt-view { display: none; overflow-x: auto; padding: 8px 4px 16px; }
+.gantt-view.active { display: block; }
+.gantt-wrap { min-width: 100%; }
+.gantt-months { display: flex; position: relative; height: 24px; margin-bottom: 4px; padding: 0 160px 0 160px; }
+.gantt-month { position: absolute; font-size: 11px; font-weight: 600; color: #c8c8cc; text-align: center; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; }
+.gantt-month.current-month { color: #1a1a1a; }
+.gantt-row { display: flex; align-items: center; background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 10px; overflow: hidden; height: 48px; margin-bottom: 6px; transition: box-shadow 0.15s; }
+.gantt-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.gantt-row-info { width: 160px; flex-shrink: 0; padding: 0 14px; border-right: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; }
+.gantt-row-name { font-size: 13px; font-weight: 500; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gantt-row-dept { font-size: 10px; color: #aaa; }
+.gantt-row-timeline { flex: 1; position: relative; height: 100%; display: flex; align-items: center; }
+.gantt-bar { position: absolute; height: 26px; border-radius: 6px; display: flex; align-items: center; padding: 0 8px; font-size: 11px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; cursor: pointer; transition: opacity 0.15s, transform 0.15s; }
+.gantt-bar:hover { opacity: 1 !important; transform: scaleY(1.15); }
+.gantt-bar-label { overflow: hidden; text-overflow: ellipsis; }
+.gantt-empty { text-align: center; padding: 60px 40px; color: #aaa; font-size: 14px; }
+
+/* ---- Modal ---- */
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+.modal.active { display: flex; }
+.modal-content { background: #fff; border-radius: 16px; width: 90%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.08); }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; letter-spacing: -0.01em; }
+.modal-close { width: 28px; height: 28px; border-radius: 8px; border: none; background: rgba(0,0,0,0.05); cursor: pointer; font-size: 16px; color: #888; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.modal-close:hover { background: rgba(0,0,0,0.1); }
+.modal-body { padding: 24px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 8px; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 14px; font-family: inherit; color: #1a1a1a; background: #fff; transition: border-color 0.15s, box-shadow 0.15s; }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: #007aff; box-shadow: 0 0 0 3px rgba(0,122,255,0.1); }
+.form-group input::placeholder { color: #bbb; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn-submit { width: 100%; padding: 12px; background: #1a1a1a; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: -0.01em; transition: background 0.15s; }
+.btn-submit:hover { background: #333; }
+.btn-delete { width: 100%; padding: 12px; background: #fff0f0; color: #e03131; border: 1px solid rgba(224,49,49,0.2); border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.color-picker { display: flex; gap: 8px; margin-top: 8px; }
+.color-opt { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s; }
+.color-opt:hover { transform: scale(1.1); }
+.color-opt.selected { border-color: #1a1a1a; }
+.member-list { border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; overflow: hidden; }
+.member-item { display: flex; align-items: center; padding: 10px 12px; cursor: pointer; transition: background 0.1s; border-bottom: 1px solid rgba(0,0,0,0.04); }
+.member-item:last-child { border-bottom: none; }
+.member-item:hover { background: #f5f5f7; }
+.member-item input { width: 16px; height: 16px; margin-right: 10px; accent-color: #007aff; }
+.member-item span { font-size: 13px; color: #1a1a1a; }
+.delete-node-btn { width: 100%; padding: 10px; background: #fff; color: #e03131; border: 1px solid rgba(224,49,49,0.2); border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
+.delete-node-btn:hover { background: #fff0f0; }
+
+/* ---- Toast ---- */
+#drag-toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.3s; white-space: nowrap; }
+
+/* ---- Utility ---- */
+.empty-state { text-align: center; padding: 80px 40px; color: #aaa; }
+.empty-state h3 { font-size: 16px; font-weight: 500; color: #666; margin-bottom: 8px; }
+.empty-state p { font-size: 13px; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1100px) {
+    .main-container { grid-template-columns: 220px 1fr; }
+    .cal-3col { grid-template-columns: 120px 1fr 120px; gap: 8px; }
+}
+@media (max-width: 768px) {
+    .main-container { grid-template-columns: 1fr; }
+    .sidebar { max-height: 200px; border-right: none; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .content-container { padding: 16px; }
+    .cal-3col { grid-template-columns: 1fr; }
+    .cal-box.side { display: none; }
+    .cal-box.center { order: -1; }
+    .view-tabs { width: 100%; }
+    .view-tab { flex: 1; text-align: center; }
+}
+
+/* ---- Loading ---- */
+.loading { display: flex; align-items: center; justify-content: center; padding: 60px; color: #aaa; }
+.loading::after { content: ''; width: 20px; height: 20px; border: 2px solid #e8e8ed; border-top-color: #1a1a1a; border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>📊 项目时间线</h1>
+            <div>
+                <button class="btn btn-secondary" onclick="exportData()">📤 导出</button>
+                <button class="btn btn-primary" onclick="openModal('projectModal')">+ 新建项目</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="sidebar">
+            <h2>📁 项目列表</h2>
+            <div id="projectList"></div>
+        </div>
+        <div class="content-container">
+            <div id="emptyState" style="text-align: center; padding: 60px; color: #86868b;">
+                <h3 style="margin-bottom: 12px; color: #1d1d1f;">选择一个项目</h3>
+                <p>在左侧选择项目，或创建新项目</p>
+            </div>
+            <div id="projectView" style="display: none;">
+                <div class="content-header">
+                    <div>
+                        <h2 id="currentProjectName">项目名称</h2>
+                        <span id="projectInfo" style="color: #86868b; font-size: 14px;"></span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="openEditProjectModal()">✏️ 编辑项目</button>
+                </div>
+                <div class="view-tabs">
+                    <button class="view-tab active" onclick="switchView('calendar')">📅 月历</button>
+                    <button class="view-tab" onclick="switchView('timeline')">📋 时间线</button>
+                    <button class="view-tab" onclick="switchView('gantt')">📊 甘特图</button>
+                </div>
+                <div id="calendarView" class="calendar-view active">
+                    <div class="cal-wrap">
+                        <div class="cal-nav">
+                            <div class="cal-title" id="calendarTitle">2024年1月</div>
+                        </div>
+                        <div class="cal-3col" id="calendarContainer"></div>
+                    </div>
+                </div>
+                <div id="timelineView" class="timeline-view">
+                    <div id="timelineItems"></div>
+                </div>
+                <div id="ganttView" class="gantt-view">
+                    <div class="gantt-wrap" id="ganttWrap">
+                        <div id="ganttRows"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建项目弹窗 -->
+    <div class="modal" id="projectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>新建项目</h3>
+                <button class="modal-close" onclick="closeModal('projectModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="projectForm">
+                    <div class="form-group">
+                        <label>项目名称</label>
+                        <input type="text" id="projectName" placeholder="例如：产品V2.0开发" required>
+                    </div>
+                    <div class="form-group">
+                        <label>制片</label>
+                        <select id="projectProducer">
+                            <option value="">-- 选择制片 --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea id="projectDesc" rows="2"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>开始日期</label>
+                            <input type="date" id="projectStart" required>
+                        </div>
+                        <div class="form-group">
+                            <label>结束日期</label>
+                            <input type="date" id="projectEnd" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">创建项目</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑项目弹窗 -->
+    <div class="modal" id="editProjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑项目</h3>
+                <button class="modal-close" onclick="closeModal('editProjectModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="editProjectForm">
+                    <input type="hidden" id="editProjectId">
+                    <div class="form-group">
+                        <label>项目名称</label>
+                        <input type="text" id="editProjectName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>制片</label>
+                        <select id="editProjectProducer">
+                            <option value="">-- 选择制片 --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea id="editProjectDesc" rows="2"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>开始日期</label>
+                            <input type="date" id="editProjectStart" required>
+                        </div>
+                        <div class="form-group">
+                            <label>结束日期</label>
+                            <input type="date" id="editProjectEnd" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">保存修改</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 节点弹窗 -->
+    <div class="modal" id="nodeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="nodeModalTitle">添加时间节点</h3>
+                <button class="modal-close" onclick="closeModal('nodeModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="nodeForm">
+                    <input type="hidden" id="editNodeId">
+                    <div class="form-group">
+                        <label>节点名称</label>
+                        <select id="nodeName" onchange="handleNodeNameAndColor()">
+                            <option value="">-- 选择节点 --</option>
+                            <option value="创意A">💡 创意A</option>
+                            <option value="创意B">💡 创意B</option>
+                            <option value="创意定稿">✅ 创意定稿</option>
+                            <option value="分镜A">🎬 分镜A</option>
+                            <option value="分镜B">🎬 分镜B</option>
+                            <option value="分镜定稿">✅ 分镜定稿</option>
+                            <option value="美术方案">🎨 美术方案</option>
+                            <option value="PPM">📋 PPM</option>
+                            <option value="F-PPM">📋 F-PPM</option>
+                            <option value="拍摄日">🎥 拍摄日</option>
+                            <option value="A-CO">✂️ A-CO</option>
+                            <option value="B-CO">✂️ B-CO</option>
+                            <option value="C-CO">✂️ C-CO</option>
+                            <option value="交付">📦 交付</option>
+                            <option value="__custom__">✏️ 其他（手动输入）</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="customNodeNameGroup" style="display: none;">
+                        <label>自定义节点名称</label>
+                        <input type="text" id="customNodeName" placeholder="请输入节点名称" onchange="handleNodeNameAndColor()">
+                    </div>
+                    <div class="form-group">
+                        <label>颜色标记</label>
+                        <div class="color-picker">
+                            <div class="color-opt tag-blue selected" style="background: #007aff" data-color="blue"></div>
+                            <div class="color-opt tag-green" style="background: #34c759" data-color="green"></div>
+                            <div class="color-opt tag-orange" style="background: #ff9500" data-color="orange"></div>
+                            <div class="color-opt tag-red" style="background: #ff3b30" data-color="red"></div>
+                            <div class="color-opt tag-purple" style="background: #af52de" data-color="purple"></div>
+                            <div class="color-opt" style="background: #ff2d92" data-color="pink"></div>
+                            <div class="color-opt" style="background: #5ac8fa" data-color="teal"></div>
+                        </div>
+                        <input type="hidden" id="nodeColor" value="blue">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>开始日期</label>
+                            <input type="date" id="nodeStart" required>
+                        </div>
+                        <div class="form-group">
+                            <label>结束日期</label>
+                            <input type="date" id="nodeEnd" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>负责部门</label>
+                        <select id="nodeDept" onchange="updateDeptMembers()">
+                            <option value="">-- 选择部门 --</option>
+                            <option value="__external__">🏢 外部人员</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="externalDeptGroup" style="display: none;">
+                        <label>外部人员名称</label>
+                        <input type="text" id="externalDeptName" placeholder="请输入外部人员或团队名称">
+                    </div>
+                    <div class="form-group" id="deptLeaderGroup" style="display: none;">
+                        <label>部门负责人</label>
+                        <input type="text" id="deptLeader" readonly style="background: #f5f5f7;">
+                    </div>
+                    <div class="form-group" id="deptMembersGroup" style="display: none;">
+                        <label>选择执行人员（可多选）</label>
+                        <div class="member-select-list" id="deptMembersList"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>备注</label>
+                        <textarea id="nodeNote" rows="2"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button type="submit" class="btn-submit" style="flex: 1;">保存节点</button>
+                        <button type="button" id="deleteNodeBtn" class="btn-submit" style="flex: 1; background: #ff3b30; display: none;" onclick="deleteCurrentNode()">删除节点</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出弹窗 -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>导出项目</h3>
+                <button class="modal-close" onclick="closeModal('exportModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>格式</label>
+                    <select id="exportFormat" onchange="updatePreview()">
+                        <option value="markdown">📄 Markdown</option>
+                        <option value="csv">📊 CSV</option>
+                        <option value="excel">📗 Excel (.xlsx)</option>
+                        <option value="pdf">📕 PDF</option>
+                        <option value="json">💾 JSON</option>
+                        <option value="schedule">📅 时间表</option>
+                    </select>
+                </div>
+                <div class="export-preview" id="exportPreview"></div>
+                <button class="btn-submit" onclick="downloadExport()">📥 下载</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="drag-toast"></div>
+
+    <script>
+        const DEPARTMENTS = {
+            '后期组': { leader: '黄灏', members: ['潘晓然', '顾达发', '姜枫', '余鑫水', '于坤阳', '冯瀚霖', '张凯楠', '周冰聪', '黄灏'] },
+            '导演创意组': { leader: '张弨', members: ['张听雨', '张弨', '付诗琴', '肖扬', '柳西航'] },
+            '美术设计组': { leader: '李梦玲', members: ['冉依林', '王唯森', '李梦玲'] },
+            '摄影组': { leader: '张裕浓', members: ['聂建航', '卢佳捷', '张勇', '吕德轩', '张裕浓'] }
+        };
+
+        const PRODUCERS = ['董雨奇', '王丹阳', '欧羑泓', '罗林', '张梓航', '潘晓然', '冯瀚霖', '黄灏'];
+
+        let projects = [];
+        let currentProjectId = null;
+        let currentMonth = new Date();
+        let selectedColor = 'blue';
+        const colors = { blue: '#007aff', green: '#34c759', orange: '#ff9500', red: '#ff3b30', purple: '#af52de', pink: '#ff2d92', teal: '#5ac8fa' };
+
+        // API 调用
+        async function apiCall(url, options = {}) {
+            const res = await fetch('/api' + url, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options
+            });
+            return res.json();
+        }
+
+        async function init() {
+            initDeptSelect();
+            initProducerSelect();
+            try {
+                await loadProjects();
+            } catch(e) {
+                console.error('加载项目失败:', e);
+                document.getElementById('projectList').innerHTML = '<p style="color:#ff3b30;text-align:center">连接服务器失败，请确认后端服务已启动</p>';
+            }
+            if (projects.length > 0) await selectProject(projects[0].id);
+        }
+
+        async function loadProjects() {
+            const res = await apiCall('/projects');
+            if (res.code === 0) {
+                projects = (res.data || []).map(p => ({
+                    ...p,
+                    startDate: p.start_date,
+                    endDate: p.end_date,
+                    nodes: []
+                }));
+                renderProjectList();
+            }
+        }
+
+        function initProducerSelect() {
+            const select = document.getElementById('projectProducer');
+            const editSelect = document.getElementById('editProjectProducer');
+            const options = '<option value="">-- 选择制片 --</option>' +
+                PRODUCERS.map(p => '<option value="' + p + '">' + p + '</option>').join('');
+            if (select) select.innerHTML = options;
+            if (editSelect) editSelect.innerHTML = options;
+        }
+
+        function openEditProjectModal() {
+            const p = projects.find(x => x.id === currentProjectId);
+            if (!p) return;
+            document.getElementById('editProjectId').value = p.id;
+            document.getElementById('editProjectName').value = p.name;
+            document.getElementById('editProjectProducer').value = p.producer || '';
+            document.getElementById('editProjectDesc').value = p.description || '';
+            document.getElementById('editProjectStart').value = p.startDate;
+            document.getElementById('editProjectEnd').value = p.endDate;
+            openModal('editProjectModal');
+        }
+
+        document.getElementById('editProjectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editProjectId').value;
+            const data = {
+                name: document.getElementById('editProjectName').value,
+                producer: document.getElementById('editProjectProducer').value,
+                description: document.getElementById('editProjectDesc').value,
+                startDate: document.getElementById('editProjectStart').value,
+                endDate: document.getElementById('editProjectEnd').value,
+            };
+            await apiCall(`/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+            closeModal('editProjectModal');
+            await loadProjects();
+            await selectProject(id);
+        });
+
+        function renderProjectList() {
+            const list = document.getElementById('projectList');
+            if (projects.length === 0) {
+                list.innerHTML = '<p style="color: #86868b; text-align: center;">暂无项目</p>';
+                return;
+            }
+
+            const grouped = {};
+            projects.forEach(p => {
+                const date = new Date(p.startDate);
+                const yearMonth = `${date.getFullYear()}年${date.getMonth() + 1}月`;
+                if (!grouped[yearMonth]) grouped[yearMonth] = [];
+                grouped[yearMonth].push(p);
+            });
+
+            const sortedMonths = Object.keys(grouped).sort((a, b) => {
+                const dateA = new Date(a.replace('年', '-').replace('月', ''));
+                const dateB = new Date(b.replace('年', '-').replace('月', ''));
+                return dateB - dateA;
+            });
+
+            let html = '';
+            sortedMonths.forEach((month, index) => {
+                const isExpanded = index === 0;
+                const arrow = isExpanded ? '▼' : '▶';
+                const display = isExpanded ? 'block' : 'none';
+                html += `<div class="month-group" style="margin-bottom: 12px;">`;
+                html += `<div class="month-header" onclick="toggleMonth('${month}')" style="font-size: 13px; font-weight: 600; color: #1d1d1f; padding: 10px 12px; background: #f5f5f7; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">`;
+                html += `<span>📅 ${month}</span><span class="month-arrow" data-month="${month}">${arrow}</span>`;
+                html += `</div>`;
+                html += `<div class="month-projects" id="month-${month}" style="display: ${display}; padding-top: 8px;">`;
+                grouped[month].forEach(p => {
+                    html += `
+                        <div class="project-item ${p.id === currentProjectId ? 'active' : ''}" onclick="selectProject('${p.id}')" style="margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <h3 style="font-size: 13px;">${p.name}</h3>
+                                <button onclick="event.stopPropagation(); deleteProject('${p.id}')" style="background: #ff3b30; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;">删除</button>
+                            </div>
+                            <p style="font-size: 11px; color: #86868b;">${p.startDate} ~ ${p.endDate}</p>
+                            ${p.producer ? `<p style="font-size: 11px; color: #007aff; margin-top: 2px;">🎬 ${p.producer}</p>` : ''}
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+            });
+
+            list.innerHTML = html;
+        }
+
+        function toggleMonth(month) {
+            const projectsDiv = document.getElementById(`month-${month}`);
+            const arrow = document.querySelector(`.month-arrow[data-month="${month}"]`);
+            if (projectsDiv.style.display === 'none') {
+                projectsDiv.style.display = 'block';
+                arrow.textContent = '▼';
+            } else {
+                projectsDiv.style.display = 'none';
+                arrow.textContent = '▶';
+            }
+        }
+
+        async function deleteProject(projectId) {
+            if (!confirm('确定要删除这个项目吗？所有节点数据也将被删除。')) return;
+            await apiCall(`/projects/${projectId}`, { method: 'DELETE' });
+            if (currentProjectId === projectId) {
+                currentProjectId = null;
+                document.getElementById('projectView').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+            }
+            await loadProjects();
+        }
+
+        async function selectProject(id) {
+            currentProjectId = id;
+            const p = projects.find(x => x.id === id);
+            if (!p) return;
+            const res = await apiCall(`/projects/${id}`);
+            if (res.code !== 0) return;
+            const fullProject = res.data;
+            p.nodes = fullProject.nodes || [];
+            p.nodes = p.nodes.map(n => ({
+                ...n,
+                startDate: n.start_date || n.startDate,
+                endDate: n.end_date || n.endDate
+            }));
+            renderProjectList();
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('projectView').style.display = 'block';
+            document.getElementById('currentProjectName').textContent = p.name;
+            document.getElementById('projectInfo').textContent = `${p.startDate} ~ ${p.endDate} · ${p.nodes?.length || 0} 个节点`;
+            renderCalendar();
+            renderTimeline();
+            renderGantt();
+        }
+
+        // 中国公共假期（2025-2026）
+        const CN_HOLIDAYS = {
+            '2025-01-01': '元旦', '2025-01-28': '春节', '2025-01-29': '春节', '2025-01-30': '春节',
+            '2025-01-31': '春节', '2025-02-01': '春节', '2025-02-02': '春节', '2025-02-03': '春节',
+            '2025-02-04': '春节', '2025-04-04': '清明', '2025-04-05': '清明', '2025-04-06': '清明',
+            '2025-05-01': '劳动节', '2025-05-02': '劳动节', '2025-05-03': '劳动节', '2025-05-04': '劳动节', '2025-05-05': '劳动节',
+            '2025-05-31': '端午', '2025-06-01': '端午', '2025-06-02': '端午',
+            '2025-10-01': '国庆', '2025-10-02': '国庆', '2025-10-03': '国庆', '2025-10-04': '国庆',
+            '2025-10-05': '国庆', '2025-10-06': '国庆', '2025-10-07': '国庆', '2025-10-08': '国庆',
+            '2026-01-01': '元旦', '2026-02-17': '春节', '2026-02-18': '春节', '2026-02-19': '春节',
+            '2026-02-20': '春节', '2026-02-21': '春节', '2026-02-22': '春节', '2026-02-23': '春节',
+            '2026-04-05': '清明', '2026-04-06': '清明',
+            '2026-05-01': '劳动节', '2026-05-02': '劳动节', '2026-05-03': '劳动节', '2026-05-04': '劳动节', '2026-05-05': '劳动节',
+            '2026-06-19': '端午', '2026-06-20': '端午', '2026-06-21': '端午',
+            '2026-10-01': '国庆', '2026-10-02': '国庆', '2026-10-03': '国庆', '2026-10-04': '国庆',
+            '2026-10-05': '国庆', '2026-10-06': '国庆', '2026-10-07': '国庆', '2026-10-08': '国庆',
+        };
+        const WORKDAYS = new Set([
+            '2025-01-26','2025-02-08','2025-04-27','2025-09-28','2025-10-11',
+            '2026-02-15','2026-02-28','2026-04-26','2026-09-27','2026-10-10'
+        ]);
+
+        function getDayClasses(dateStr, dayOfWeek, isOtherMonth) {
+            const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6) && !WORKDAYS.has(dateStr);
+            const isHoliday = !!CN_HOLIDAYS[dateStr];
+            let cls = 'day';
+            if (isOtherMonth) cls += ' old';
+            if (isHoliday) cls += ' hd';
+            else if (isWeekend) cls += ' wk';
+            return cls;
+        }
+
+        function renderCalendar() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            document.getElementById('calendarTitle').textContent = `${year}年${month + 1}月`;
+
+            const p = projects.find(x => x.id === currentProjectId);
+            const nodes = p?.nodes || [];
+            const today = new Date();
+
+            function renderMonth(y, m, isSide, isInteractive) {
+                const firstDay = new Date(y, m, 1);
+                const lastDay = new Date(y, m + 1, 0);
+                const startDay = firstDay.getDay();
+                const totalDays = lastDay.getDate();
+                const prevLastDay = new Date(y, m, 0).getDate();
+                const sideClass = isSide ? 'side' : 'center';
+
+                var onclk = isSide ? ((sideClass === 'side') ? 'onclick="changeMonth(-1)"' : 'onclick="changeMonth(1)"') : '';
+                let html = `<div class="cal-box ${sideClass}" ${onclk}>`;
+                var hdrOnclk = isSide ? 'onclick="' + ((sideClass === 'side') ? 'changeMonth(-1)' : 'changeMonth(1)') + '" style="cursor:pointer"' : '';
+                html += `<div class="cal-hdr"${hdrOnclk}>${y}年${m + 1}月</div>`;
+                html += '<div class="cal-grid">';
+                ['日','一','二','三','四','五','六'].forEach(d => html += `<div class="wd">${d}</div>`);
+
+                for (let i = startDay - 1; i >= 0; i--) {
+                    const d = prevLastDay - i;
+                    const prevM = m === 0 ? 11 : m - 1;
+                    const prevY = m === 0 ? y - 1 : y;
+                    const ds = `${prevY}-${String(prevM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    const dow = new Date(ds).getDay();
+                    const cls = getDayClasses(ds, dow, true);
+                    const hd = CN_HOLIDAYS[ds];
+                    html += `<div class="${cls}" style="cursor:default"><div class="dnum">${d}</div>${hd?`<span class="hlbl hl">${hd}</span>`:''}</div>`;
+                }
+
+                for (let day = 1; day <= totalDays; day++) {
+                    const date = new Date(y, m, day);
+                    const isToday = date.toDateString() === today.toDateString();
+                    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                    const dow = date.getDay();
+                    let cls = getDayClasses(dateStr, dow, false);
+                    if (isToday) cls += ' today';
+                    const hd = CN_HOLIDAYS[dateStr];
+                    const workday = WORKDAYS.has(dateStr);
+                    const clickHandler = isInteractive ? `onclick="openNodeModal('${dateStr}')" ondragover="onDayDragOver(event)" ondragleave="onDayDragLeave(event)" ondrop="onDayDrop(event, '${dateStr}')"` : '';
+                    html += `<div class="${cls}" data-date="${dateStr}" ${clickHandler}>`;
+                    html += `<div class="dnum">${day}</div>`;
+                    if (hd) html += `<span class="hlbl hl">${hd}</span>`;
+                    if (workday) html += `<span class="hlbl hw">班</span>`;
+
+                    if (isInteractive) {
+                        let topOffset = 48;
+                        nodes.forEach(node => {
+                            const nodeStart = new Date(node.startDate);
+                            const nodeEnd = new Date(node.endDate);
+                            const cellDate = new Date(dateStr);
+                            if (cellDate >= nodeStart && cellDate <= nodeEnd) {
+                                const isStart = cellDate.toDateString() === nodeStart.toDateString();
+                                const borderRadius = isStart ? '3px 0 0 3px' : '0';
+                                if (isStart) {
+                                    html += `<div class="ebar" draggable="true" data-node-id="${node.id}" style="top:${topOffset}px;background:${colors[node.color]};border-radius:${borderRadius};" onclick="event.stopPropagation();openNodeModal(null,'${node.id}')" ondragstart="onNodeDragStart(event,'${node.id}')">${node.name}</div>`;
+                                } else {
+                                    html += `<div class="ebar" style="top:${topOffset}px;background:${colors[node.color]};border-radius:0;"></div>`;
+                                }
+                                topOffset += 22;
+                            }
+                        });
+                    }
+                    html += '</div>';
+                }
+
+                const remaining = 42 - (startDay + totalDays);
+                for (let i = 1; i <= remaining; i++) {
+                    const nextM = m === 11 ? 0 : m + 1;
+                    const nextY = m === 11 ? y + 1 : y;
+                    const ds = `${nextY}-${String(nextM+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                    const dow = new Date(ds).getDay();
+                    const cls = getDayClasses(ds, dow, true);
+                    const hd = CN_HOLIDAYS[ds];
+                    html += `<div class="${cls}" style="cursor:default"><div class="dnum">${i}</div>${hd?`<span class="hlbl hl">${hd}</span>`:''}</div>`;
+                }
+
+                html += '</div></div>';
+                return html;
+            }
+
+            const prevM = month === 0 ? 11 : month - 1;
+            const prevY = month === 0 ? year - 1 : year;
+            const nextM = month === 11 ? 0 : month + 1;
+            const nextY = month === 11 ? year + 1 : year;
+
+            const prevHtml = renderMonth(prevY, prevM, true, false);
+            const centerHtml = renderMonth(year, month, false, true);
+            const nextHtml = renderMonth(nextY, nextM, true, false);
+            const html = '<div class="cal-col-side">' + prevHtml + '</div>'
+                       + '<div class="cal-col-main">'
+                       + '<button class="cal-prev-btn" onclick="changeMonth(-1)">◀</button>'
+                       + '<button class="cal-next-btn" onclick="changeMonth(1)">▶</button>'
+                       + centerHtml
+                       + '</div>'
+                       + '<div class="cal-col-side">' + nextHtml + '</div>';
+
+            document.getElementById('calendarContainer').innerHTML = html;
+        }
+
+        function changeMonth(delta) {
+            currentMonth.setMonth(currentMonth.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function renderTimeline() {
+            const p = projects.find(x => x.id === currentProjectId);
+            const container = document.getElementById('timelineItems');
+            if (!p?.nodes || p.nodes.length === 0) {
+                container.innerHTML = '<div class="tl-empty-axis">暂无节点，请先添加节点</div>';
+                return;
+            }
+            const sorted = [...p.nodes].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+            const today = new Date();
+            const projStart = new Date(sorted[0].startDate);
+            const projEnd = new Date(sorted[sorted.length - 1].endDate);
+            const totalSpan = Math.max(Math.ceil((projEnd - projStart) / 86400000) + 1, 30);
+            let nodesHtml = '<div class="tl-wrap">';
+            let barsHtml = '';
+            sorted.forEach(n => {
+                const nStart = new Date(n.startDate);
+                const nEnd = new Date(n.endDate);
+                const offset = Math.max(0, Math.ceil((nStart - projStart) / 86400000));
+                const duration = Math.ceil((nEnd - nStart) / 86400000) + 1;
+                const left = (offset / totalSpan) * 100;
+                const width = Math.min((duration / totalSpan) * 100, 100 - left);
+                const isDone = nEnd < today;
+                const color = colors[n.color] || '#007aff';
+                barsHtml += '<div style="position:absolute;left:' + left + '%;width:' + width + '%;background:' + color + ';opacity:' + (isDone ? '0.18' : '0.35') + ';height:100%;border-radius:4px;"></div>';
+            });
+            nodesHtml += '<div style="position:relative;height:44px;margin:0 0 6px;">' + barsHtml + '</div>';
+            nodesHtml += '<div class="tl-axis"></div><div class="tl-nodes">';
+            sorted.forEach((n, i) => {
+                const end = new Date(n.endDate);
+                const start = new Date(n.startDate);
+                const isCompleted = end < today;
+                const inProgress = start <= today && end >= today;
+                const dotClass = isCompleted ? 'completed' : (inProgress ? 'in-progress' : 'upcoming');
+                const dotColor = colors[n.color] || '#007aff';
+                nodesHtml += '<div class="tl-node">' +
+                    (i < sorted.length - 1 ? '<div class="tl-connector"></div>' : '') +
+                    '<div class="tl-node-top">' +
+                    '<div class="tl-dot ' + dotClass + '" style="--dot-color:' + dotColor + '"></div>' +
+                    '<div class="tl-date">' + n.startDate + (n.startDate !== n.endDate ? ' ~ ' + n.endDate : '') + '</div>' +
+                    '</div>' +
+                    '<div class="tl-node-bottom">' +
+                    '<div class="tl-node-name">' + n.name + '</div>' +
+                    (n.dept ? '<div class="tl-node-dept tag-' + n.color + '">' + n.dept + '</div>' : '') +
+                    (n.leader ? '<div class="tl-node-leader">👤 ' + n.leader + '</div>' : '') +
+                    '<div class="tl-node-actions">' +
+                    '<button class="tl-edit-btn" onclick="openNodeModal(null,\'' + n.id + '\')">编辑</button>' +
+                    '<button class="tl-del-btn" onclick="deleteNode(\'' + n.id + '\')">删除</button>' +
+                    '</div></div></div>';
+            });
+            nodesHtml += '</div></div>';
+            container.innerHTML = nodesHtml;
+        }
+
+        async function deleteNode(nodeId) {
+            if (!confirm('确定要删除这个节点吗？')) return;
+            await apiCall(`/nodes/${nodeId}`, { method: 'DELETE' });
+            await selectProject(currentProjectId);
+        }
+
+        function renderGantt() {
+            var p = projects.find(function(x) { return x.id === currentProjectId; });
+            var container = document.getElementById('ganttRows');
+            if (!p || !p.nodes || p.nodes.length === 0) {
+                container.innerHTML = '<div class="gantt-empty">暂无节点</div>';
+                return;
+            }
+            var nodes = p.nodes.slice().sort(function(a, b) { return new Date(a.startDate) - new Date(b.startDate); });
+            var projStart = new Date(p.startDate);
+            var projEnd = new Date(p.endDate);
+            var totalDays = Math.max(Math.ceil((projEnd - projStart) / 86400000) + 1, 30);
+            var today = new Date();
+            var months = [];
+            var d = new Date(projStart.getFullYear(), projStart.getMonth(), 1);
+            while (d <= projEnd) {
+                var mLabel = d.getFullYear() + '年' + (d.getMonth()+1) + '月';
+                var mDays = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+                var offset = Math.max(0, Math.ceil((d - projStart) / 86400000));
+                var leftPct = (offset / totalDays) * 100;
+                var widthPct = Math.min((mDays / totalDays) * 100, 100 - leftPct);
+                var isCurrent = today.getFullYear() === d.getFullYear() && today.getMonth() === d.getMonth();
+                months.push({ label: mLabel, leftPct: leftPct, widthPct: widthPct, isCurrent: isCurrent });
+                d.setMonth(d.getMonth() + 1);
+            }
+            var monthsHtml = '';
+            for (var i = 0; i < months.length; i++) {
+                var m = months[i];
+                var cls = 'gantt-month' + (m.isCurrent ? ' current-month' : '');
+                monthsHtml += '<div class="' + cls + '" style="position:absolute;left:' + m.leftPct + '%;width:' + m.widthPct + '%">' + m.label + '</div>';
+            }
+            var rowsHtml = '<div class="gantt-months" style="position:relative;height:24px;padding:0;">' + monthsHtml + '</div>';
+            for (var j = 0; j < nodes.length; j++) {
+                var n = nodes[j];
+                var nStart = new Date(n.startDate);
+                var nEnd = new Date(n.endDate);
+                var nOffset = Math.max(0, Math.ceil((nStart - projStart) / 86400000));
+                var nDuration = Math.ceil((nEnd - nStart) / 86400000) + 1;
+                var left = (nOffset / totalDays) * 100;
+                var width = Math.min((nDuration / totalDays) * 100, 100 - left);
+                var isDone = nEnd < today;
+                var color = colors[n.color] || '#007aff';
+                rowsHtml += '<div class="gantt-row">';
+                rowsHtml += '<div class="gantt-row-info"><div class="gantt-row-name">' + n.name + '</div>' + (n.dept ? '<div class="gantt-row-dept">' + n.dept + '</div>' : '') + '</div>';
+                rowsHtml += '<div class="gantt-row-timeline"><div class="gantt-bar" style="left:' + left + '%;width:' + width + '%;background:' + color + ';opacity:' + (isDone ? '0.5' : '0.85') + ';" onclick="openNodeModal(null,\'' + n.id + '\')"><span class="gantt-bar-label">' + n.name + '</span></div></div>';
+                rowsHtml += '</div>';
+            }
+            container.innerHTML = rowsHtml;
+        }
+
+        function switchView(view) {
+            document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('calendarView').classList.toggle('active', view === 'calendar');
+            document.getElementById('timelineView').classList.toggle('active', view === 'timeline');
+            document.getElementById('ganttView').classList.toggle('active', view === 'gantt');
+        }
+
+        function openNodeModal(dateStr, nodeId) {
+            const p = projects.find(x => x.id === currentProjectId);
+
+            if (nodeId && p) {
+                const node = p.nodes.find(n => n.id == nodeId);
+                if (!node) return;
+
+                document.getElementById('nodeModalTitle').textContent = '编辑时间节点';
+                document.getElementById('editNodeId').value = nodeId;
+                document.getElementById('deleteNodeBtn').style.display = 'block';
+
+                if (['创意A','创意B','创意定稿','分镜A','分镜B','分镜定稿','美术方案','PPM','F-PPM','拍摄日','A-CO','B-CO','C-CO','交付'].includes(node.name)) {
+                    document.getElementById('nodeName').value = node.name;
+                    document.getElementById('customNodeNameGroup').style.display = 'none';
+                } else {
+                    document.getElementById('nodeName').value = '__custom__';
+                    document.getElementById('customNodeName').value = node.name;
+                    document.getElementById('customNodeNameGroup').style.display = 'block';
+                }
+
+                selectedColor = node.color || 'blue';
+                document.getElementById('nodeColor').value = selectedColor;
+                document.querySelectorAll('.color-opt').forEach(o => {
+                    o.classList.toggle('selected', o.dataset.color === selectedColor);
+                });
+
+                document.getElementById('nodeStart').value = node.startDate;
+                document.getElementById('nodeEnd').value = node.endDate;
+
+                const deptKeys = Object.keys(DEPARTMENTS);
+                if (node.dept && deptKeys.includes(node.dept)) {
+                    document.getElementById('nodeDept').value = node.dept;
+                    updateDeptMembers();
+                } else if (node.dept) {
+                    document.getElementById('nodeDept').value = '__external__';
+                    document.getElementById('externalDeptName').value = node.dept;
+                    updateDeptMembers();
+                } else {
+                    document.getElementById('nodeDept').value = '';
+                    updateDeptMembers();
+                }
+
+                document.getElementById('nodeNote').value = node.note || '';
+            } else {
+                document.getElementById('nodeModalTitle').textContent = '添加时间节点';
+                document.getElementById('editNodeId').value = '';
+                document.getElementById('deleteNodeBtn').style.display = 'none';
+                document.getElementById('nodeForm').reset();
+                document.getElementById('nodeStart').value = dateStr || '';
+                document.getElementById('nodeEnd').value = dateStr || '';
+                document.getElementById('customNodeNameGroup').style.display = 'none';
+                document.getElementById('deptLeaderGroup').style.display = 'none';
+                document.getElementById('deptMembersGroup').style.display = 'none';
+                document.getElementById('externalDeptGroup').style.display = 'none';
+                selectedColor = 'blue';
+                document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'));
+                document.querySelector('.color-opt[data-color="blue"]').classList.add('selected');
+                document.getElementById('nodeColor').value = 'blue';
+            }
+
+            openModal('nodeModal');
+        }
+
+        async function deleteCurrentNode() {
+            const nodeId = document.getElementById('editNodeId').value;
+            if (!nodeId) return;
+            if (!confirm('确定要删除这个节点吗？')) return;
+            await apiCall(`/nodes/${nodeId}`, { method: 'DELETE' });
+            closeModal('nodeModal');
+            await selectProject(currentProjectId);
+        }
+
+        document.querySelectorAll('.color-opt').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                selectedColor = opt.dataset.color;
+                document.getElementById('nodeColor').value = selectedColor;
+            });
+        });
+
+        document.getElementById('projectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const project = {
+                id: Date.now().toString(),
+                name: document.getElementById('projectName').value,
+                producer: document.getElementById('projectProducer').value,
+                description: document.getElementById('projectDesc').value,
+                startDate: document.getElementById('projectStart').value,
+                endDate: document.getElementById('projectEnd').value,
+            };
+            await apiCall('/projects', { method: 'POST', body: JSON.stringify(project) });
+            closeModal('projectModal');
+            document.getElementById('projectForm').reset();
+            await loadProjects();
+            selectProject(project.id);
+        });
+
+        const nodeColorMap = {
+            '创意A': 'blue', '创意B': 'blue', '创意定稿': 'blue',
+            '分镜A': 'green', '分镜B': 'green', '分镜定稿': 'green',
+            '美术方案': 'orange',
+            'PPM': 'purple', 'F-PPM': 'purple',
+            '拍摄日': 'red',
+            'A-CO': 'pink', 'B-CO': 'pink', 'C-CO': 'pink',
+            '交付': 'teal'
+        };
+
+        const nodeDeptMap = {
+            '创意A': '导演创意组', '创意B': '导演创意组', '创意定稿': '导演创意组',
+            '分镜A': '导演创意组', '分镜B': '导演创意组', '分镜定稿': '导演创意组',
+            '美术方案': '美术设计组',
+            'A-CO': '后期组', 'B-CO': '后期组', 'C-CO': '后期组', '交付': '后期组'
+        };
+        const noDeptNodes = ['PPM', 'F-PPM', '拍摄日'];
+
+        function handleNodeNameAndColor() {
+            const select = document.getElementById('nodeName');
+            const customGroup = document.getElementById('customNodeNameGroup');
+
+            if (select.value === '__custom__') {
+                customGroup.style.display = 'block';
+                document.getElementById('nodeColor').value = 'blue';
+                document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'));
+                document.querySelector('.color-opt[data-color="blue"]').classList.add('selected');
+            } else if (select.value) {
+                customGroup.style.display = 'none';
+                const color = nodeColorMap[select.value] || 'blue';
+                document.getElementById('nodeColor').value = color;
+                document.querySelectorAll('.color-opt').forEach(o => {
+                    o.classList.toggle('selected', o.dataset.color === color);
+                });
+                const autoDept = nodeDeptMap[select.value];
+                if (autoDept) {
+                    document.getElementById('nodeDept').value = autoDept;
+                    updateDeptMembers();
+                } else if (noDeptNodes.includes(select.value)) {
+                    document.getElementById('nodeDept').value = '';
+                    updateDeptMembers();
+                }
+            } else {
+                customGroup.style.display = 'none';
+            }
+        }
+
+        function initDeptSelect() {
+            const select = document.getElementById('nodeDept');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- 选择部门 --</option>' +
+                '<option value="__external__">🏢 外部人员</option>';
+            Object.keys(DEPARTMENTS).forEach(dept => {
+                select.innerHTML += '<option value="' + dept + '">' + dept + ' (' + DEPARTMENTS[dept].leader + ')</option>';
+            });
+        }
+
+        function updateDeptMembers() {
+            const dept = document.getElementById('nodeDept').value;
+            const leaderGroup = document.getElementById('deptLeaderGroup');
+            const membersGroup = document.getElementById('deptMembersGroup');
+            const externalGroup = document.getElementById('externalDeptGroup');
+            const leaderInput = document.getElementById('deptLeader');
+            const membersList = document.getElementById('deptMembersList');
+
+            leaderGroup.style.display = 'none';
+            membersGroup.style.display = 'none';
+            externalGroup.style.display = 'none';
+
+            if (dept === '__external__') {
+                externalGroup.style.display = 'block';
+            } else if (dept && DEPARTMENTS[dept]) {
+                const deptInfo = DEPARTMENTS[dept];
+                leaderGroup.style.display = 'block';
+                leaderInput.value = deptInfo.leader;
+                membersGroup.style.display = 'block';
+                membersList.innerHTML = deptInfo.members.map(member =>
+                    '<label class="member-item">' +
+                        '<input type="checkbox" value="' + member + '" class="dept-member-checkbox">' +
+                        '<span>' + member + '</span>' +
+                    '</label>'
+                ).join('');
+            }
+        }
+
+        document.getElementById('nodeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentProjectId) return;
+
+            const nodeNameSelect = document.getElementById('nodeName');
+            let nodeNameValue = nodeNameSelect.value;
+            if (nodeNameValue === '__custom__') {
+                nodeNameValue = document.getElementById('customNodeName').value || '其他';
+            }
+
+            const editNodeId = document.getElementById('editNodeId').value;
+
+            let dept = document.getElementById('nodeDept').value;
+            let deptLeader = '';
+            let selectedMembers = [];
+
+            if (dept === '__external__') {
+                dept = document.getElementById('externalDeptName').value || '外部人员';
+                deptLeader = '';
+                selectedMembers = [];
+            } else if (dept && DEPARTMENTS[dept]) {
+                deptLeader = document.getElementById('deptLeader').value;
+                const checkboxes = document.querySelectorAll('.dept-member-checkbox:checked');
+                selectedMembers = Array.from(checkboxes).map(cb => cb.value);
+            }
+
+            const nodeData = {
+                name: nodeNameValue,
+                color: document.getElementById('nodeColor').value || 'blue',
+                startDate: document.getElementById('nodeStart').value,
+                endDate: document.getElementById('nodeEnd').value,
+                dept: dept,
+                leader: deptLeader,
+                members: selectedMembers,
+                note: document.getElementById('nodeNote').value
+            };
+
+            if (editNodeId) {
+                await apiCall(`/nodes/${editNodeId}`, { method: 'PUT', body: JSON.stringify(nodeData) });
+            } else {
+                await apiCall(`/projects/${currentProjectId}/nodes`, { method: 'POST', body: JSON.stringify({ id: Date.now().toString(), ...nodeData }) });
+            }
+
+            closeModal('nodeModal');
+            document.getElementById('nodeForm').reset();
+            document.getElementById('customNodeNameGroup').style.display = 'none';
+            document.getElementById('deptLeaderGroup').style.display = 'none';
+            document.getElementById('deptMembersGroup').style.display = 'none';
+            document.getElementById('externalDeptGroup').style.display = 'none';
+            await selectProject(currentProjectId);
+        });
+
+        function exportData() {
+            if (!currentProjectId) { alert('请先选择项目'); return; }
+            updatePreview();
+            openModal('exportModal');
+        }
+
+        function updatePreview() {
+            const p = projects.find(x => x.id === currentProjectId);
+            const format = document.getElementById('exportFormat').value;
+            let content = '';
+            if (format === 'markdown') {
+                content = `# ${p.name}\n\n**周期：** ${p.startDate} ~ ${p.endDate}\n\n| 日期 | 节点 | 部门 | 负责人 |\n|------|------|------|--------|\n`;
+                p.nodes?.forEach(n => { content += `| ${n.startDate} | ${n.name} | ${n.dept || '-'} | ${n.leader || '-'} |\n`; });
+            } else if (format === 'csv') {
+                content = '日期,节点,开始,结束,部门,负责人,备注\n';
+                p.nodes?.forEach(n => { content += `${n.startDate},${n.name},${n.startDate},${n.endDate},${n.dept || ''},${n.leader || ''},${n.note || ''}\n`; });
+            } else if (format === 'json') {
+                content = JSON.stringify(p, null, 2);
+            } else if (format === 'schedule') {
+                const sorted = [...(p.nodes || [])].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+                content = `项目名称：${p.name}\n`;
+                content += `项目周期：${p.startDate} ~ ${p.endDate}\n`;
+                if (p.producer) content += `制片：${p.producer}\n`;
+                content += `${'='.repeat(60)}\n\n节点时间表\n`;
+                content += `${'-'.repeat(60)}\n`;
+                sorted.forEach(n => {
+                    const start = new Date(n.startDate);
+                    const end = new Date(n.endDate);
+                    const duration = Math.ceil((end - start) / 86400000) + 1;
+                    content += `\n【${n.name}】\n`;
+                    content += `  开始：${n.startDate}\n`;
+                    content += `  结束：${n.endDate}\n`;
+                    content += `  周期：${duration} 天\n`;
+                    if (n.dept) content += `  负责部门：${n.dept}\n`;
+                    if (n.leader) content += `  负责人：${n.leader}\n`;
+                    if (n.note) content += `  备注：${n.note}\n`;
+                });
+                content += `\n${'='.repeat(60)}\n`;
+                content += `导出时间：${new Date().toLocaleString('zh-CN')}\n`;
+            } else {
+                content = JSON.stringify(p, null, 2);
+            }
+            document.getElementById('exportPreview').textContent = content;
+        }
+
+        function downloadExport() {
+            const p = projects.find(x => x.id === currentProjectId);
+            const format = document.getElementById('exportFormat').value;
+            const content = document.getElementById('exportPreview').textContent;
+            let ext = 'txt';
+            let mimeType = 'text/plain;charset=utf-8';
+            if (format === 'csv') { ext = 'csv'; mimeType = 'text/csv;charset=utf-8'; }
+            else if (format === 'json') { ext = 'json'; mimeType = 'application/json'; }
+
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${p.name}_时间表.${ext}`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 拖拽功能
+        let dragNodeId = null;
+        let dragStartDate = null;
+
+        function onNodeDragStart(e, nodeId) {
+            dragNodeId = nodeId;
+            const p = projects.find(x => x.id === currentProjectId);
+            const node = p?.nodes.find(n => n.id == nodeId);
+            dragStartDate = node?.startDate || null;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', nodeId);
+            setTimeout(() => e.target.classList.add('dragging'), 0);
+        }
+
+        function onDayDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function onDayDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        async function onDayDrop(e, targetDateStr) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+            if (!dragNodeId || !dragStartDate) return;
+
+            const p = projects.find(x => x.id === currentProjectId);
+            if (!p) return;
+            const node = p.nodes.find(n => n.id == dragNodeId);
+            if (!node) return;
+
+            const oldStart = new Date(node.startDate);
+            const oldEnd = new Date(node.endDate);
+            const duration = oldEnd - oldStart;
+            const newStart = new Date(targetDateStr);
+            const newEnd = new Date(newStart.getTime() + duration);
+
+            const newStartStr = newStart.toISOString().split('T')[0];
+            const newEndStr = newEnd.toISOString().split('T')[0];
+
+            await apiCall(`/nodes/${dragNodeId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ ...node, startDate: newStartStr, endDate: newEndStr })
+            });
+
+            showToast(`「${node.name}」已移至 ${newStartStr}`);
+            dragNodeId = null;
+            dragStartDate = null;
+            await selectProject(currentProjectId);
+        }
+
+        function showToast(msg) {
+            let t = document.getElementById('drag-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'drag-toast';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.style.opacity = '1';
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.style.opacity = '0', 2000);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        document.querySelectorAll('.modal').forEach(m => {
+            m.addEventListener('click', (e) => { if (e.target === m) closeModal(m.id); });
+        });
+
+        // 注册 Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+
+        init();
+    </script>
+</body>
+</html>

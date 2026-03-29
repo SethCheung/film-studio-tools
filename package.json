@@ -1,0 +1,17 @@
+{
+  "name": "film-studio-tools",
+  "version": "1.0.0",
+  "description": "影视制作公司内部工具套件 - 项目时间线管理 & 报价单生成",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js"
+  },
+  "keywords": ["film-production", "timeline", "project-management"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "express": "^4.18.0"
+  }
+}

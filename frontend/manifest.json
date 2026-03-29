@@ -1,0 +1,16 @@
+{
+  "name": "Film Studio Tools",
+  "short_name": "FilmTools",
+  "description": "影视制作公司内部工具",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f8f8",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a1a1a'/><text x='50' y='68' text-anchor='middle' font-size='50' fill='white'>🎬</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
