@@ -1,0 +1,30 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run AI Review
+        env:
+          M3_ULTRA_URL: ${{ secrets.M3_ULTRA_URL }}
+          M3_ULTRA_MODEL: ${{ secrets.M3_ULTRA_MODEL }}
+          M3_ULTRA_API_KEY: ${{ secrets.M3_ULTRA_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python .github/workflows/review_pr.py
