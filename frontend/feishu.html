@@ -2,15 +2,15 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SJM Films - 项目时间线</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SJM Films - 飞书时间线</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1A1A2E">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" href="https://sjmfilms.com/favicon-16x16.png" type="image/png">
     <style>
-/* ---- SJM Films Brand CSS Variables ---- */
+/* ---- Feishu Version - Mobile First ---- */
 :root {
     /* SJM Brand Colors */
     --sjm-primary: #1A1A2E;
@@ -61,12 +61,199 @@ body {
     color: var(--text-primary); 
     font-size: 14px; 
     line-height: 1.5; 
+    overflow: hidden;
 }
 
-/* ---- SJM Header ---- */
-.header { 
-    background: var(--bg-header); 
-    padding: 0 32px; 
+/* ---- Feishu Version Styles ---- */
+
+/* Header - Feishu Style */
+.feishu-header {
+    background: var(--bg-header);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.feishu-header-left, .feishu-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Project Selector Button */
+.project-selector-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 160px;
+    transition: var(--transition);
+}
+.project-selector-btn:active {
+    background: rgba(255, 255, 255, 0.2);
+}
+.project-selector-icon { font-size: 16px; }
+.project-selector-text { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project-selector-arrow { font-size: 10px; opacity: 0.6; }
+
+/* Icon Buttons */
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+.icon-btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.2); }
+
+/* Project Drawer */
+.project-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    visibility: hidden;
+    pointer-events: none;
+}
+.project-drawer.active {
+    visibility: visible;
+    pointer-events: all;
+}
+.drawer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.project-drawer.active .drawer-overlay { opacity: 1; }
+.drawer-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    max-height: 70vh;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+.project-drawer.active .drawer-content { transform: translateY(0); }
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+}
+.drawer-header h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.drawer-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-main);
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+.drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+}
+.drawer-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+}
+.btn-primary-full {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--sjm-accent) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.btn-primary-full:active { transform: scale(0.98); }
+
+/* Feishu Main Content */
+.feishu-main {
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px;
+}
+
+/* Empty State */
+.feishu-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+.empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
+.feishu-empty h3 { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+.feishu-empty p { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+
+/* Feishu Content Header */
+.feishu-content-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+}
+.feishu-content-header h2 { font-size: 22px; font-weight: 700; color: var(--sjm-primary); }
+.feishu-content-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.feishu-content-actions .btn {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    height: 40px;
+    justify-content: center;
+}
+
+/* Mobile Full Layout */
+@media (min-width: 769px) {
+    .feishu-header { padding: 12px 24px; }
+    .feishu-main { padding: 24px; }
+    .project-selector-btn { min-width: 200px; }
+}
+
+/* ---- SJM Header (hidden in feishu version) ---- */
+.header { display: none; } 
     height: 64px; 
     position: sticky; 
     top: 0; 
@@ -115,75 +302,8 @@ body {
 .main-container { display: grid; grid-template-columns: 288px 1fr; height: calc(100vh - 60px); overflow: hidden; }
 
 /* ---- SJM Sidebar ---- */
-.sidebar { background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 20px 16px; overflow-y: auto; }
+.sidebar { background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 24px 16px; overflow-y: auto; }
 .sidebar h2 { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px; padding: 0 12px; }
-.sidebar-divider { height: 1px; background: var(--border); margin: 12px 0 16px; }
-
-/* 醒目总览入口卡片 */
-.overview-entry {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-    background: linear-gradient(135deg, var(--sjm-accent) 0%, #0088cc 100%);
-    border-radius: 14px;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 16px rgba(0, 160, 233, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-.overview-entry::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 100%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
-    pointer-events: none;
-}
-.overview-entry:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 160, 233, 0.4);
-}
-.overview-entry:active {
-    transform: translateY(0);
-}
-.overview-icon {
-    font-size: 28px;
-    width: 48px;
-    height: 48px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.overview-text {
-    flex: 1;
-    color: #fff;
-}
-.overview-title {
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    margin-bottom: 2px;
-}
-.overview-sub {
-    font-size: 11px;
-    opacity: 0.85;
-    font-weight: 400;
-}
-.overview-arrow {
-    font-size: 20px;
-    color: rgba(255,255,255,0.8);
-    transition: transform 0.2s;
-}
-.overview-entry:hover .overview-arrow {
-    transform: translateX(4px);
-}
 .month-group { margin-bottom: 8px; }
 .month-header { font-size: 12px; font-weight: 600; color: var(--text-secondary); padding: 10px 12px; background: var(--bg-card); border-radius: var(--radius-md); cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; border: 1px solid var(--border); transition: var(--transition); }
 .month-header:hover { background: var(--bg-main); border-color: var(--primary-light); }
@@ -217,7 +337,6 @@ body {
 .cal-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: var(--text-primary); }
 .cal-3col { display: grid; grid-template-columns: 260px 1fr 260px; gap: 16px; align-items: start; }
 .cal-col-side { }
-.cal-col-center { position: relative; }
 .cal-col-main { position: relative; }
 .cal-prev-btn, .cal-next-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; font-size: 14px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); transition: var(--transition); }
 .cal-prev-btn:hover, .cal-next-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateY(-50%) scale(1.1); }
@@ -228,13 +347,8 @@ body {
 .cal-box.side:active { opacity: 0.5; }
 .cal-box.center { box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
 .cal-box { background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); }
-.cal-hdr { display: flex; padding: 12px 8px; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-secondary); background: var(--bg-main); border-bottom: 1px solid var(--border); letter-spacing: 0; }
-.cal-dow { flex: 1; text-align: center; font-weight: 600; padding: 4px 0; }
-.cal-dow:first-child { color: #ef4444; }
-.cal-dow:last-child { color: #3b82f6; }
-.cal-body { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.cal-body.side { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.cal-box.center .cal-hdr { background: linear-gradient(135deg, var(--sjm-primary) 0%, #2A2A4E 100%); color: #fff; border-bottom: none; font-size: 16px; padding: 14px 12px; font-weight: 700; letter-spacing: 0.02em; }
+.cal-hdr { padding: 16px; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-secondary); background: var(--bg-main); border-bottom: 1px solid var(--border); letter-spacing: 0; }
+.cal-box.center .cal-hdr { background: linear-gradient(135deg, var(--sjm-primary) 0%, #2A2A4E 100%); color: #fff; border-bottom: none; font-size: 16px; padding: 18px; font-weight: 700; letter-spacing: 0.02em; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .side .cal-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .wd { padding: 10px 4px; text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.02em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: var(--bg-main); }
@@ -266,109 +380,6 @@ body {
 .ebar:hover { opacity: 0.9; transform: scaleY(1.15); box-shadow: 0 4px 8px rgba(0,0,0,0.25); }
 .side .ebar { display: none; }
 .day.drag-over { background: rgba(99, 102, 241, 0.1); outline: 2px dashed var(--primary); outline-offset: -2px; }
-
-/* ---- Overview Calendar (总览视图) ---- */
-.obar { position: absolute; left: 4px; right: 4px; height: 16px; border-radius: 4px; font-size: 10px; color: #fff; display: flex; align-items: center; padding: 0 6px; overflow: hidden; white-space: nowrap; cursor: pointer; transition: var(--transition); }
-.obar:hover { opacity: 0.85; transform: scaleY(1.1); }
-.obar-project { font-weight: 600; margin-right: 4px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; }
-.obar-name { opacity: 0.9; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-.obar-more { position: absolute; left: 4px; right: 4px; height: 14px; font-size: 9px; color: #86868b; display: flex; align-items: center; justify-content: center; }
-#overviewView { padding: 0; }
-#overviewView .content-header { padding: 24px 0 16px; }
-.overview-cal-wrap { max-width: 100%; }
-.overview-cal-wrap .cal-3col { grid-template-columns: 280px 1fr 280px; }
-.overview-cal-wrap .cal-col-center .cal-box { min-height: 500px; }
-
-/* 总览侧边项目卡片 */
-.overview-projects {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 0 4px;
-}
-.overview-project-card {
-    display: flex;
-    gap: 10px;
-    padding: 12px;
-    background: var(--bg-card);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-.overview-project-card:hover {
-    transform: translateX(4px);
-    border-color: var(--primary-light);
-    box-shadow: var(--shadow-md);
-}
-.overview-card-color {
-    width: 4px;
-    border-radius: 2px;
-    flex-shrink: 0;
-}
-.overview-card-content {
-    flex: 1;
-    min-width: 0;
-}
-.overview-card-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 4px;
-}
-.overview-card-meta {
-    margin-bottom: 4px;
-}
-.overview-card-dates {
-    font-size: 11px;
-    color: var(--text-muted);
-}
-.overview-card-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    color: var(--text-secondary);
-}
-.overview-card-nodes {
-    background: rgba(0, 160, 233, 0.1);
-    color: var(--sjm-accent);
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: 500;
-}
-
-/* 项目图例 */
-.overview-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 16px;
-    padding: 12px 16px;
-    background: var(--bg-card);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
-}
-.overview-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-.overview-legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    flex-shrink: 0;
-}
-.overview-legend-name {
-    font-weight: 500;
-    color: var(--text-primary);
-}
 
 /* ---- Timeline View ---- */
 .timeline-view { display: none; overflow-x: auto; padding: 16px 8px 32px; }
@@ -422,17 +433,17 @@ body {
 .gantt-empty { text-align: center; padding: 80px 40px; color: var(--text-muted); font-size: 15px; }
 
 /* ---- Modal ---- */
-.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 16px; }
 .modal.active { display: flex; }
-.modal-content { background: var(--bg-card); border-radius: var(--radius-lg); width: 90%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid var(--border); }
-.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.modal-content { background: var(--bg-card); border-radius: var(--radius-lg); width: 100%; max-width: 480px; max-height: calc(100vh - 32px); display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid var(--border); overflow: hidden; }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
 .modal-header h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
 .modal-close { width: 32px; height: 32px; border-radius: var(--radius-md); border: none; background: var(--bg-main); cursor: pointer; font-size: 18px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
 .modal-close:hover { background: var(--danger); color: #fff; }
-.modal-body { padding: 24px; }
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
-.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; font-family: inherit; color: var(--text-primary); background: var(--bg-card); transition: var(--transition); }
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; font-family: inherit; color: var(--text-primary); background: var(--bg-card); transition: var(--transition); }
 .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--sjm-accent); box-shadow: 0 0 0 3px rgba(0, 160, 233, 0.15); }
 
 /* ---- Export Preview Styles ---- */
@@ -465,11 +476,11 @@ body {
 .color-opt { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: var(--transition); box-shadow: var(--shadow-sm); }
 .color-opt:hover { transform: scale(1.15); box-shadow: var(--shadow-md); }
 .color-opt.selected { border-color: var(--text-primary); transform: scale(1.1); }
-.member-list { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
-.member-item { display: flex; align-items: center; padding: 12px 14px; cursor: pointer; transition: var(--transition); border-bottom: 1px solid var(--border); }
+.member-list { border: 1px solid var(--border); border-radius: var(--radius-md); overflow-y: auto; max-height: 140px; }
+.member-item { display: flex; align-items: center; padding: 10px 12px; cursor: pointer; transition: var(--transition); border-bottom: 1px solid var(--border); }
 .member-item:last-child { border-bottom: none; }
 .member-item:hover { background: var(--bg-main); }
-.member-item input { width: 16px; height: 16px; margin-right: 10px; accent-color: #007aff; }
+.member-item input { width: 16px; height: 16px; margin-right: 10px; accent-color: #007aff; flex-shrink: 0; }
 .member-item span { font-size: 13px; color: #1a1a1a; }
 .delete-node-btn { width: 100%; padding: 10px; background: #fff; color: #e03131; border: 1px solid rgba(224,49,49,0.2); border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
 .delete-node-btn:hover { background: #fff0f0; }
@@ -585,20 +596,23 @@ body {
     
     /* Modals Mobile */
     .modal-content { 
-        width: 95%; 
+        width: 100%; 
         max-width: none; 
-        margin: 10px;
-        border-radius: 16px;
+        margin: 0;
+        border-radius: 16px 16px 0 0;
+        max-height: 85vh;
     }
-    .modal-header { padding: 16px; }
-    .modal-header h3 { font-size: 16px; }
-    .modal-body { padding: 16px; }
-    .form-group { margin-bottom: 16px; }
+    .node-modal-content { max-height: 85vh; }
+    .modal-header { padding: 14px 16px; }
+    .modal-header h3 { font-size: 15px; }
+    .modal-body { padding: 14px 16px; }
+    .form-group { margin-bottom: 12px; }
     .form-group input, .form-group textarea, .form-group select { 
         padding: 10px 12px; 
         font-size: 14px; 
     }
     .btn-submit { padding: 12px; font-size: 14px; }
+    .node-modal-footer { padding: 12px 16px; }
     
     /* Export Modal Mobile */
     .export-preview { 
@@ -643,42 +657,6 @@ body {
     .modal-content { margin: 5px; }
 }
 
-/* ---- Large Screen (>= 1440px) ---- */
-@media (min-width: 1440px) {
-    .main-container { grid-template-columns: 320px 1fr; }
-    .content-container { padding: 36px 48px; }
-    .sidebar { padding: 28px 20px; }
-    .content-header h2 { font-size: 28px; }
-    .cal-3col { grid-template-columns: 280px 1fr 280px; gap: 20px; }
-    .cal-hdr { padding: 18px; font-size: 15px; }
-    .day { min-height: 68px; }
-    .dnum { width: 30px; height: 30px; font-size: 14px; }
-    .ebar { height: 22px; font-size: 12px; }
-    .tl-node-bottom { padding: 16px; }
-    .tl-node-name { font-size: 15px; }
-    .gantt-row { height: 56px; }
-    .gantt-row-info { width: 200px; }
-    .gantt-bar { height: 30px; font-size: 13px; }
-}
-
-/* ---- Extra Large Screen (>= 1920px) ---- */
-@media (min-width: 1920px) {
-    .main-container { grid-template-columns: 360px 1fr; max-width: 1920px; margin: 0 auto; }
-    .content-container { padding: 40px 56px; }
-    .sidebar { padding: 32px 24px; }
-    .content-header h2 { font-size: 30px; }
-    .cal-3col { grid-template-columns: 320px 1fr 320px; gap: 24px; }
-    .cal-hdr { padding: 20px; font-size: 16px; }
-    .day { min-height: 76px; }
-    .dnum { width: 32px; height: 32px; font-size: 15px; }
-    .ebar { height: 24px; font-size: 12px; padding: 0 10px; }
-    .tl-node-bottom { padding: 18px; }
-    .tl-node-name { font-size: 16px; }
-    .gantt-row { height: 60px; }
-    .gantt-row-info { width: 220px; }
-    .gantt-bar { height: 32px; font-size: 14px; }
-}
-
 /* ---- Touch-friendly additions ---- */
 @media (hover: none) and (pointer: coarse) {
     .btn:hover { transform: none; }
@@ -701,87 +679,77 @@ body {
 .sync-loading { animation: spin 0.8s linear infinite; }
 @keyframes syncPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
 .sync-pulse { animation: syncPulse 1s infinite; }
+
+/* ---- Node Modal Fixed Size ---- */
+.node-modal-content { max-height: 85vh; }
+.node-modal-body { flex: 1; overflow-y: auto; min-height: 0; }
+.node-modal-footer { display: flex; gap: 10px; padding: 12px 20px; border-top: 1px solid var(--border); background: #fff; flex-shrink: 0; }
+.node-modal-footer .btn-submit { flex: 1; }
+.node-modal-footer .btn-delete { flex: 0 0 auto; width: auto; padding: 10px 16px; }
+
+/* Hidden fields utility */
+.hidden-field { display: none; }
+
+/* Mobile adjustments for modals */
+@media (max-width: 480px) {
+    .node-modal-content { max-height: 90vh; }
+    .modal-content { max-width: none; margin: 0; border-radius: 16px 16px 0 0; }
+    .node-modal-footer { flex-direction: column; gap: 8px; }
+    .node-modal-footer .btn-submit,
+    .node-modal-footer .btn-delete { width: 100%; }
+}
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <div class="header-brand">
-                <svg class="header-logo" viewBox="0 0 120 32" xmlns="http://www.w3.org/2000/svg">
-                    <text x="0" y="24" font-family="Arial, sans-serif" font-weight="700" font-size="22" fill="#FFFFFF">SJM</text>
-                    <text x="52" y="24" font-family="Arial, sans-serif" font-weight="400" font-size="14" fill="rgba(255,255,255,0.7)">Films</text>
-                </svg>
-                <span class="header-subtitle">项目时间线</span>
+    <!-- 飞书版 Header -->
+    <div class="feishu-header">
+        <div class="feishu-header-left">
+            <button class="project-selector-btn" onclick="toggleProjectDrawer()">
+                <span class="project-selector-icon">📁</span>
+                <span class="project-selector-text" id="currentProjectTitle">选择项目</span>
+                <span class="project-selector-arrow">▼</span>
+            </button>
+        </div>
+        <div class="feishu-header-right">
+            <button class="icon-btn" onclick="exportData()" title="导出">📤</button>
+            <button class="icon-btn" onclick="openModal('projectModal')" title="新建">➕</button>
+        </div>
+    </div>
+    
+    <!-- 项目抽屉 -->
+    <div class="project-drawer" id="projectDrawer">
+        <div class="drawer-overlay" onclick="toggleProjectDrawer()"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3>📁 选择项目</h3>
+                <button class="drawer-close" onclick="toggleProjectDrawer()">×</button>
             </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div id="feishuStatus" class="feishu-status disconnected" style="color: rgba(255,255,255,0.6);">
-                    <span class="status-dot" style="background: rgba(255,255,255,0.3);"></span>
-                    <span class="status-text">飞书未连接</span>
-                </div>
-                <button class="btn btn-secondary" onclick="exportData()">📤 导出</button>
-                <button class="btn btn-primary" onclick="openModal('projectModal')">+ 新建项目</button>
+            <div class="drawer-body" id="projectList"></div>
+            <div class="drawer-footer">
+                <button class="btn-primary-full" onclick="openModal('projectModal'); toggleProjectDrawer();">+ 新建项目</button>
             </div>
         </div>
     </div>
-    <div class="main-container">
-        <div class="sidebar">
-            <!-- 醒目总览入口 -->
-            <div class="overview-entry" onclick="showOverview()">
-                <div class="overview-icon">📅</div>
-                <div class="overview-text">
-                    <div class="overview-title">总览日历</div>
-                    <div class="overview-sub">所有项目进度一览</div>
-                </div>
-                <div class="overview-arrow">→</div>
-            </div>
-            <div class="sidebar-divider"></div>
-            <!-- 项目列表视图 -->
-            <div id="projectListView">
-                <h2>📁 项目列表</h2>
-                <div id="projectList"></div>
-            </div>
-            <!-- 总览模式项目卡片 -->
-            <div id="overviewProjectList" style="display: none;"></div>
-        </div>
-        <div class="content-container">
-            <!-- 总览视图 - 显示所有项目的节点 -->
-            <div id="overviewView">
-                <div class="content-header">
-                    <div>
-                        <h2>📅 总览日历</h2>
-                        <span style="color: #86868b; font-size: 14px;">所有项目进度一览</span>
-                    </div>
-                    <button class="btn btn-secondary" onclick="showProjectView()">← 返回项目</button>
-                </div>
-                <div class="view-tabs">
-                    <button class="view-tab active" onclick="switchOverviewMonth(-1)">◀</button>
-                    <button class="view-tab" id="overviewMonthTitle" style="min-width: 120px;">2026年3月</button>
-                    <button class="view-tab" onclick="switchOverviewMonth(1)">▶</button>
-                    <button class="view-tab" onclick="goToToday()" style="margin-left: 20px;">今天</button>
-                </div>
-                <div class="cal-wrap overview-cal-wrap">
-                    <div class="cal-3col" id="overviewCalendarContainer"></div>
-                </div>
-                <!-- 项目图例 -->
-                <div id="overviewLegend" class="overview-legend"></div>
-            </div>
 
-            <!-- 项目详情视图 -->
-            <div id="emptyState" style="text-align: center; padding: 60px; color: #86868b;">
-                <h3 style="margin-bottom: 12px; color: #1d1d1f;">选择一个项目</h3>
-                <p>在左侧选择项目，或创建新项目</p>
-            </div>
-            <div id="projectView" style="display: none;">
-                <div class="content-header">
+    <!-- 主内容区 -->
+    <div class="feishu-main">
+        <div id="emptyState" class="feishu-empty">
+            <div class="empty-icon">📋</div>
+            <h3>选择一个项目</h3>
+            <p>点击上方「选择项目」开始</p>
+            <button class="btn-primary-full" onclick="toggleProjectDrawer()">📁 浏览项目</button>
+        </div>
+        <div id="projectView" style="display: none;">
+                <div class="feishu-content-header">
                     <div>
                         <h2 id="currentProjectName">项目名称</h2>
                         <span id="projectInfo" style="color: #86868b; font-size: 14px;"></span>
                     </div>
-                    <div style="display: flex; gap: 8px;">
+                    <div class="feishu-content-actions">
                         <button class="btn btn-secondary" id="feishuSyncBtn" onclick="syncProjectToFeishu()" style="background: linear-gradient(135deg, #00a1f1, #0066cc); color: #fff;">
-                            <span id="feishuSyncIcon">🔄</span> <span id="feishuSyncText">同步到飞书</span>
+                            <span id="feishuSyncIcon">🔄</span> <span id="feishuSyncText">同步</span>
                         </button>
-                        <button class="btn btn-secondary" onclick="openEditProjectModal()">✏️ 编辑项目</button>
+                        <button class="btn btn-secondary" onclick="openEditProjectModal()">✏️</button>
                     </div>
                 </div>
                 <div class="view-tabs">
@@ -890,12 +858,12 @@ body {
 
     <!-- 节点弹窗 -->
     <div class="modal" id="nodeModal">
-        <div class="modal-content" style="display: flex; flex-direction: column; max-height: 90vh;">
+        <div class="modal-content node-modal-content">
             <div class="modal-header">
                 <h3 id="nodeModalTitle">添加时间节点</h3>
                 <button class="modal-close" onclick="closeModal('nodeModal')">×</button>
             </div>
-            <div class="modal-body" style="flex: 1; overflow-y: auto;">
+            <div class="modal-body node-modal-body">
                 <form id="nodeForm">
                     <input type="hidden" id="editNodeId">
                     <div class="form-group">
@@ -919,7 +887,7 @@ body {
                             <option value="__custom__">✏️ 其他（手动输入）</option>
                         </select>
                     </div>
-                    <div class="form-group" id="customNodeNameGroup" style="display: none;">
+                    <div class="form-group hidden-field" id="customNodeNameGroup">
                         <label>自定义节点名称</label>
                         <input type="text" id="customNodeName" placeholder="请输入节点名称" onchange="handleNodeNameAndColor()">
                     </div>
@@ -953,15 +921,15 @@ body {
                             <option value="__external__">🏢 外部人员</option>
                         </select>
                     </div>
-                    <div class="form-group" id="externalDeptGroup" style="display: none;">
+                    <div class="form-group hidden-field" id="externalDeptGroup">
                         <label>外部人员名称</label>
                         <input type="text" id="externalDeptName" placeholder="请输入外部人员或团队名称">
                     </div>
-                    <div class="form-group" id="deptLeaderGroup" style="display: none;">
+                    <div class="form-group hidden-field" id="deptLeaderGroup">
                         <label>部门负责人</label>
                         <input type="text" id="deptLeader" readonly style="background: #f5f5f7;">
                     </div>
-                    <div class="form-group" id="deptMembersGroup" style="display: none;">
+                    <div class="form-group hidden-field" id="deptMembersGroup">
                         <label>选择执行人员（可多选）</label>
                         <div class="member-select-list" id="deptMembersList"></div>
                     </div>
@@ -971,9 +939,9 @@ body {
                     </div>
                 </form>
             </div>
-            <div style="display: flex; gap: 12px; padding: 16px 20px; border-top: 1px solid rgba(0,0,0,0.06); background: #fff; border-radius: 0 0 16px 16px;">
-                <button type="submit" form="nodeForm" class="btn-submit" style="flex: 1;">保存节点</button>
-                <button type="button" id="deleteNodeBtn" class="btn-submit" style="flex: 1; background: #ff3b30; display: none;" onclick="deleteCurrentNode()">删除节点</button>
+            <div class="modal-footer node-modal-footer">
+                <button type="submit" form="nodeForm" class="btn-submit">保存节点</button>
+                <button type="button" id="deleteNodeBtn" class="btn-delete" onclick="deleteCurrentNode()">删除节点</button>
             </div>
         </div>
     </div>
@@ -1018,15 +986,32 @@ body {
         let projects = [];
         let currentProjectId = null;
         let currentMonth = new Date();
-        let overviewMonth = new Date();
         let selectedColor = 'blue';
         let feishuConfigured = false;
-        let allNodes = []; // 存储所有项目的节点
         const colors = { blue: '#007aff', green: '#34c759', orange: '#ff9500', red: '#ff3b30', purple: '#af52de', pink: '#ff2d92', teal: '#5ac8fa' };
 
-        // 项目颜色映射（用于总览视图）
-        const projectColors = {};
-        const projectColorList = ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#af52de', '#ff2d92', '#5ac8fa', '#5856d6', '#ff6b35', '#00c7be'];
+        // Feishu Version: Drawer Toggle
+        function toggleProjectDrawer() {
+            const drawer = document.getElementById('projectDrawer');
+            drawer.classList.toggle('active');
+            if (drawer.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Feishu Version: Update header project title
+        function updateHeaderProjectTitle() {
+            const titleEl = document.getElementById('currentProjectTitle');
+            if (currentProjectId) {
+                const p = projects.find(x => x.id === currentProjectId);
+                titleEl.textContent = p ? p.name : '选择项目';
+            }
+        }
+
+        // Override renderProjectList to update header
+        const originalRenderProjectList = null;
 
         // API 调用
         async function apiCall(url, options = {}) {
@@ -1043,202 +1028,11 @@ body {
             await checkFeishuStatus();
             try {
                 await loadProjects();
-                await loadAllProjectsNodes();
-                renderOverviewCalendar();
             } catch(e) {
                 console.error('加载项目失败:', e);
                 document.getElementById('projectList').innerHTML = '<p style="color:#ff3b30;text-align:center">连接服务器失败，请确认后端服务已启动</p>';
             }
             if (projects.length > 0) await selectProject(projects[0].id);
-        }
-
-        // 加载所有项目的节点
-        async function loadAllProjectsNodes() {
-            allNodes = [];
-            for (const p of projects) {
-                try {
-                    const res = await apiCall(`/nodes/projects/${p.id}/nodes`);
-                    if (res.code === 0) {
-                        const nodes = (res.data || []).map(n => ({
-                            ...n,
-                            projectName: p.name,
-                            projectColor: projectColors[p.id] || (projectColors[p.id] = projectColorList[Object.keys(projectColors).length % projectColorList.length]),
-                            startDate: n.start_date || n.startDate,
-                            endDate: n.end_date || n.endDate
-                        }));
-                        allNodes = allNodes.concat(nodes);
-                    }
-                } catch(e) {
-                    console.error(`加载项目 ${p.id} 节点失败:`, e);
-                }
-            }
-        }
-
-        // 渲染总览日历
-        function renderOverviewCalendar() {
-            const year = overviewMonth.getFullYear();
-            const month = overviewMonth.getMonth();
-            document.getElementById('overviewMonthTitle').textContent = `${year}年${month + 1}月`;
-
-            const today = new Date();
-            const todayStr = today.toISOString().split('T')[0];
-
-            function renderMonth(y, m, isSide) {
-                const firstDay = new Date(y, m, 1);
-                const lastDay = new Date(y, m + 1, 0);
-                const startDay = firstDay.getDay();
-                const totalDays = lastDay.getDate();
-                const prevLastDay = new Date(y, m, 0).getDate();
-                const sideClass = isSide ? 'side' : 'center';
-
-                // 使用与普通日历一致的HTML结构：cal-box > cal-hdr + cal-grid
-                let html = `<div class="cal-box ${sideClass}">`;
-                html += `<div class="cal-hdr">${y}年${m + 1}月</div>`;
-                html += '<div class="cal-grid">';
-                // 星期标题（与普通日历一致使用 wd 类）
-                ['日','一','二','三','四','五','六'].forEach(d => html += `<div class="wd">${d}</div>`);
-
-                for (let i = startDay - 1; i >= 0; i--) {
-                    const day = prevLastDay - i;
-                    const d = new Date(y, m - 1, day);
-                    const cls = getDayClasses(d.toISOString().split('T')[0], d.getDay(), true);
-                    html += '<div class="' + cls + ' old"><div class="dnum">' + day + '</div></div>';
-                }
-
-                for (let day = 1; day <= totalDays; day++) {
-                    const d = new Date(y, m, day);
-                    const dateStr = d.toISOString().split('T')[0];
-                    const isToday = dateStr === todayStr;
-                    const cls = getDayClasses(dateStr, d.getDay(), false) + (isToday ? ' today' : '');
-                    html += '<div class="' + cls + '" data-date="' + dateStr + '" onclick="openNodeModal(\'' + dateStr + '\')">';
-                    html += '<div class="dnum">' + day + '</div>';
-
-                    // 显示该日期的节点（按项目分组）
-                    if (!isSide) {
-                        const dayNodes = allNodes.filter(n => {
-                            const start = new Date(n.startDate);
-                            const end = new Date(n.endDate);
-                            return d >= start && d <= end;
-                        });
-
-                        if (dayNodes.length > 0) {
-                            let topOffset = 34;
-                            dayNodes.forEach((node, idx) => {
-                                if (topOffset < 80) { // 最多显示2-3个
-                                    const isStart = d.toDateString() === new Date(node.startDate).toDateString();
-                                    const isEnd = d.toDateString() === new Date(node.endDate).toDateString();
-                                    let borderRadius = '0';
-                                    if (isStart && isEnd) borderRadius = '3px';
-                                    else if (isStart) borderRadius = '3px 0 0 3px';
-                                    else if (isEnd) borderRadius = '0 3px 3px 0';
-
-                                    html += `<div class="obar" style="top:${topOffset}px;background:${node.projectColor};border-radius:${borderRadius};" title="${node.projectName}: ${node.name}">`;
-                                    html += `<span class="obar-project">${node.projectName}</span>`;
-                                    if (isStart) html += `<span class="obar-name">${node.name}</span>`;
-                                    html += `</div>`;
-                                    topOffset += 18;
-                                }
-                            });
-                            if (dayNodes.length > 3) {
-                                html += `<div class="obar-more" style="top:${topOffset}px;">+${dayNodes.length - 3} 更多</div>`;
-                            }
-                        }
-                    }
-
-                    html += '</div>';
-                }
-
-                const remaining = 42 - (startDay + totalDays);
-                for (let day = 1; day <= remaining; day++) {
-                    const d = new Date(y, m + 1, day);
-                    const cls = getDayClasses(d.toISOString().split('T')[0], d.getDay(), true);
-                    html += '<div class="' + cls + ' new"><div class="dnum">' + day + '</div></div>';
-                }
-
-                html += '</div></div>';  // 关闭 cal-grid 和 cal-box
-                return html;
-            }
-
-            const prevHtml = renderMonth(year, month - 1, true);
-            const nextHtml = renderMonth(year, month + 1, true);
-            const mainHtml = renderMonth(year, month, false);
-
-            const html = '<div class="cal-col-side">' + prevHtml + '</div>'
-                       + '<div class="cal-col-center">' + mainHtml + '</div>'
-                       + '<div class="cal-col-side">' + nextHtml + '</div>';
-
-            document.getElementById('overviewCalendarContainer').innerHTML = html;
-
-            // 渲染项目列表和图例
-            renderOverviewProjectList();
-            renderOverviewLegend();
-        }
-
-        // 渲染总览项目列表（侧边栏）
-        function renderOverviewProjectList() {
-            const container = document.getElementById('overviewProjectList');
-            if (projects.length === 0) {
-                container.innerHTML = '<p style="color: #86868b; text-align: center; padding: 20px;">暂无项目</p>';
-                return;
-            }
-
-            let html = '<div class="overview-projects">';
-            projects.forEach(p => {
-                const projectColor = projectColors[p.id] || '#007aff';
-                const projectNodes = allNodes.filter(n => n.project_id === p.id || n.projectName === p.name);
-                html += `
-                    <div class="overview-project-card" onclick="selectProject('${p.id}')">
-                        <div class="overview-card-color" style="background: ${projectColor};"></div>
-                        <div class="overview-card-content">
-                            <div class="overview-card-name">${p.name}</div>
-                            <div class="overview-card-meta">
-                                <span class="overview-card-dates">${p.startDate?.slice(5) || ''} - ${p.endDate?.slice(5) || ''}</span>
-                            </div>
-                            <div class="overview-card-info">
-                                <span>🎬 ${p.producer || '未指定'}</span>
-                                <span class="overview-card-nodes">${projectNodes.length} 节点</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-        }
-
-        // 切换总览月份
-        function switchOverviewMonth(delta) {
-            overviewMonth.setMonth(overviewMonth.getMonth() + delta);
-            renderOverviewCalendar();
-        }
-
-        // 渲染项目图例
-        function renderOverviewLegend() {
-            const container = document.getElementById('overviewLegend');
-            if (projects.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-
-            let html = '';
-            projects.forEach(p => {
-                const projectColor = projectColors[p.id] || '#007aff';
-                html += `
-                    <div class="overview-legend-item">
-                        <div class="overview-legend-dot" style="background: ${projectColor};"></div>
-                        <span class="overview-legend-name">${p.name}</span>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        // 跳转到今天
-        function goToToday() {
-            overviewMonth = new Date();
-            currentMonth = new Date();
-            renderOverviewCalendar();
-            renderCalendar();
         }
 
         // 飞书状态检查
@@ -1288,7 +1082,7 @@ body {
                     const successCount = res.data?.success?.length || 0;
                     const failCount = res.data?.failed?.length || 0;
                     showToast(`✅ 同步完成：成功 ${successCount} 个${failCount > 0 ? `，失败 ${failCount} 个` : ''}`);
-                    await selectProject(currentProjectId); // 刷新视图
+                    await refreshProjectData(currentProjectId); // 刷新视图（不触碰抽屉）
                 } else {
                     alert('同步失败: ' + res.message);
                 }
@@ -1470,54 +1264,38 @@ body {
                 } else {
                     p.nodes = [];
                 }
-            } catch(e) {
+            } catch (e) {
                 console.error('获取节点失败:', e);
                 p.nodes = [];
             }
 
-            // 切换侧边栏视图：显示项目列表
-            document.getElementById('projectListView').style.display = 'block';
-            document.getElementById('overviewProjectList').style.display = 'none';
-
             renderProjectList();
-            document.getElementById('overviewView').style.display = 'none';
             document.getElementById('emptyState').style.display = 'none';
             document.getElementById('projectView').style.display = 'block';
             document.getElementById('currentProjectName').textContent = p.name;
             document.getElementById('projectInfo').textContent = `${p.startDate} ~ ${p.endDate} · ${p.nodes?.length || 0} 个节点`;
+            // Feishu version: update header title and close drawer (only if drawer is open)
+            document.getElementById('currentProjectTitle').textContent = p.name;
+            const drawer = document.getElementById('projectDrawer');
+            if (drawer && drawer.classList.contains('active')) {
+                toggleProjectDrawer();
+            }
             renderCalendar();
             renderTimeline();
             renderGantt();
         }
 
-        // 返回总览视图
-        async function showOverview() {
-            currentProjectId = null;
-            document.getElementById('projectView').style.display = 'none';
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('overviewView').style.display = 'block';
-            // 切换侧边栏显示
-            document.getElementById('projectListView').style.display = 'none';
-            document.getElementById('overviewProjectList').style.display = 'block';
-            // 加载所有项目节点
-            await loadAllProjectsNodes();
-            renderOverviewCalendar();
-        }
-
-        // 返回项目视图
-        function showProjectView() {
-            document.getElementById('overviewView').style.display = 'none';
-            document.getElementById('emptyState').style.display = 'block';
-            // 切换侧边栏显示
-            document.getElementById('projectListView').style.display = 'block';
-            document.getElementById('overviewProjectList').style.display = 'none';
-        }
-
-        // 仅刷新项目数据，不操作UI
+        // 新增 refreshProjectData - 仅刷新数据不操作抽屉状态
         async function refreshProjectData(id) {
-            if (!id) return;
+            currentProjectId = id;
             const p = projects.find(x => x.id === id);
             if (!p) return;
+
+            // 获取项目基本信息
+            const res = await apiCall(`/projects/${id}`);
+            if (res.code !== 0) return;
+
+            // 获取项目节点列表
             try {
                 const nodesRes = await apiCall(`/nodes/projects/${id}/nodes`);
                 if (nodesRes.code === 0) {
@@ -1526,10 +1304,18 @@ body {
                         startDate: n.start_date || n.startDate,
                         endDate: n.end_date || n.endDate
                     }));
+                } else {
+                    p.nodes = [];
                 }
-            } catch(e) {
-                console.error('刷新节点失败:', e);
+            } catch (e) {
+                console.error('获取节点失败:', e);
+                p.nodes = [];
             }
+
+            renderProjectList();
+            document.getElementById('currentProjectName').textContent = p.name;
+            document.getElementById('projectInfo').textContent = `${p.startDate} ~ ${p.endDate} · ${p.nodes?.length || 0} 个节点`;
+            document.getElementById('currentProjectTitle').textContent = p.name;
             renderCalendar();
             renderTimeline();
             renderGantt();
@@ -1740,7 +1526,7 @@ body {
         async function deleteNode(nodeId) {
             if (!confirm('确定要删除这个节点吗？')) return;
             await apiCall(`/nodes/${nodeId}`, { method: 'DELETE' });
-            await selectProject(currentProjectId);
+            await refreshProjectData(currentProjectId);
         }
 
         function renderGantt() {
@@ -1813,11 +1599,11 @@ body {
 
                 if (['创意A','创意B','创意定稿','分镜A','分镜B','分镜定稿','美术方案','PPM','F-PPM','拍摄日','A-CO','B-CO','C-CO','交付'].includes(node.name)) {
                     document.getElementById('nodeName').value = node.name;
-                    document.getElementById('customNodeNameGroup').style.display = 'none';
+                    document.getElementById('customNodeNameGroup').classList.add('hidden-field');
                 } else {
                     document.getElementById('nodeName').value = '__custom__';
                     document.getElementById('customNodeName').value = node.name;
-                    document.getElementById('customNodeNameGroup').style.display = 'block';
+                    document.getElementById('customNodeNameGroup').classList.remove('hidden-field');
                 }
 
                 selectedColor = node.color || 'blue';
@@ -1843,6 +1629,7 @@ body {
                 }
 
                 document.getElementById('nodeNote').value = node.note || '';
+                document.getElementById('deleteNodeBtn').style.display = '';
             } else {
                 document.getElementById('nodeModalTitle').textContent = '添加时间节点';
                 document.getElementById('editNodeId').value = '';
@@ -1850,10 +1637,10 @@ body {
                 document.getElementById('nodeForm').reset();
                 document.getElementById('nodeStart').value = dateStr || '';
                 document.getElementById('nodeEnd').value = dateStr || '';
-                document.getElementById('customNodeNameGroup').style.display = 'none';
-                document.getElementById('deptLeaderGroup').style.display = 'none';
-                document.getElementById('deptMembersGroup').style.display = 'none';
-                document.getElementById('externalDeptGroup').style.display = 'none';
+                document.getElementById('customNodeNameGroup').classList.add('hidden-field');
+                document.getElementById('deptLeaderGroup').classList.add('hidden-field');
+                document.getElementById('deptMembersGroup').classList.add('hidden-field');
+                document.getElementById('externalDeptGroup').classList.add('hidden-field');
                 selectedColor = 'blue';
                 document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'));
                 document.querySelector('.color-opt[data-color="blue"]').classList.add('selected');
@@ -1869,7 +1656,7 @@ body {
             if (!confirm('确定要删除这个节点吗？')) return;
             await apiCall(`/nodes/${nodeId}`, { method: 'DELETE' });
             closeModal('nodeModal');
-            await selectProject(currentProjectId);
+            await refreshProjectData(currentProjectId);
         }
 
         document.querySelectorAll('.color-opt').forEach(opt => {
@@ -1921,12 +1708,12 @@ body {
             const customGroup = document.getElementById('customNodeNameGroup');
 
             if (select.value === '__custom__') {
-                customGroup.style.display = 'block';
+                customGroup.classList.remove('hidden-field');
                 document.getElementById('nodeColor').value = 'blue';
                 document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'));
                 document.querySelector('.color-opt[data-color="blue"]').classList.add('selected');
             } else if (select.value) {
-                customGroup.style.display = 'none';
+                customGroup.classList.add('hidden-field');
                 const color = nodeColorMap[select.value] || 'blue';
                 document.getElementById('nodeColor').value = color;
                 document.querySelectorAll('.color-opt').forEach(o => {
@@ -1941,7 +1728,7 @@ body {
                     updateDeptMembers();
                 }
             } else {
-                customGroup.style.display = 'none';
+                customGroup.classList.add('hidden-field');
             }
         }
 
@@ -1963,17 +1750,17 @@ body {
             const leaderInput = document.getElementById('deptLeader');
             const membersList = document.getElementById('deptMembersList');
 
-            leaderGroup.style.display = 'none';
-            membersGroup.style.display = 'none';
-            externalGroup.style.display = 'none';
+            leaderGroup.classList.add('hidden-field');
+            membersGroup.classList.add('hidden-field');
+            externalGroup.classList.add('hidden-field');
 
             if (dept === '__external__') {
-                externalGroup.style.display = 'block';
+                externalGroup.classList.remove('hidden-field');
             } else if (dept && DEPARTMENTS[dept]) {
                 const deptInfo = DEPARTMENTS[dept];
-                leaderGroup.style.display = 'block';
+                leaderGroup.classList.remove('hidden-field');
                 leaderInput.value = deptInfo.leader;
-                membersGroup.style.display = 'block';
+                membersGroup.classList.remove('hidden-field');
                 membersList.innerHTML = deptInfo.members.map(member =>
                     '<label class="member-item">' +
                         '<input type="checkbox" value="' + member + '" class="dept-member-checkbox">' +
@@ -1985,12 +1772,37 @@ body {
 
         document.getElementById('nodeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentProjectId) return;
+            if (!currentProjectId) {
+                alert('请先选择项目');
+                return;
+            }
 
+            // 获取节点名称
             const nodeNameSelect = document.getElementById('nodeName');
             let nodeNameValue = nodeNameSelect.value;
             if (nodeNameValue === '__custom__') {
-                nodeNameValue = document.getElementById('customNodeName').value || '其他';
+                nodeNameValue = document.getElementById('customNodeName').value.trim();
+            }
+
+            // 验证必填字段
+            if (!nodeNameValue) {
+                alert('请选择或输入节点名称');
+                document.getElementById('nodeName').focus();
+                return;
+            }
+
+            const nodeStart = document.getElementById('nodeStart').value;
+            const nodeEnd = document.getElementById('nodeEnd').value;
+
+            if (!nodeStart) {
+                alert('请选择开始日期');
+                document.getElementById('nodeStart').focus();
+                return;
+            }
+            if (!nodeEnd) {
+                alert('请选择结束日期');
+                document.getElementById('nodeEnd').focus();
+                return;
             }
 
             const editNodeId = document.getElementById('editNodeId').value;
@@ -2000,7 +1812,7 @@ body {
             let selectedMembers = [];
 
             if (dept === '__external__') {
-                dept = document.getElementById('externalDeptName').value || '外部人员';
+                dept = document.getElementById('externalDeptName').value.trim() || '外部人员';
                 deptLeader = '';
                 selectedMembers = [];
             } else if (dept && DEPARTMENTS[dept]) {
@@ -2012,27 +1824,44 @@ body {
             const nodeData = {
                 name: nodeNameValue,
                 color: document.getElementById('nodeColor').value || 'blue',
-                startDate: document.getElementById('nodeStart').value,
-                endDate: document.getElementById('nodeEnd').value,
+                startDate: nodeStart,
+                endDate: nodeEnd,
                 dept: dept,
                 leader: deptLeader,
                 members: selectedMembers,
                 note: document.getElementById('nodeNote').value
             };
 
-            if (editNodeId) {
-                await apiCall(`/nodes/${editNodeId}`, { method: 'PUT', body: JSON.stringify(nodeData) });
-            } else {
-                await apiCall(`/nodes/projects/${currentProjectId}/nodes`, { method: 'POST', body: JSON.stringify({ id: Date.now().toString(), ...nodeData }) });
-            }
+            try {
+                let result;
+                if (editNodeId) {
+                    // 更新现有节点 - 路径: /api/nodes/:nodeId
+                    result = await apiCall(`/nodes/${editNodeId}`, { method: 'PUT', body: JSON.stringify(nodeData) });
+                } else {
+                    // 创建新节点 - 路径: /api/nodes/projects/:projectId/nodes
+                    result = await apiCall(`/nodes/projects/${currentProjectId}/nodes`, { method: 'POST', body: JSON.stringify({ id: Date.now().toString(), ...nodeData }) });
+                }
 
-            closeModal('nodeModal');
-            document.getElementById('nodeForm').reset();
-            document.getElementById('customNodeNameGroup').style.display = 'none';
-            document.getElementById('deptLeaderGroup').style.display = 'none';
-            document.getElementById('deptMembersGroup').style.display = 'none';
-            document.getElementById('externalDeptGroup').style.display = 'none';
-            await selectProject(currentProjectId);
+                // 检查返回结果
+                if (result.code === 0) {
+                    showToast('✅ 节点保存成功');
+                    closeModal('nodeModal');
+                    document.getElementById('nodeForm').reset();
+                    document.getElementById('customNodeNameGroup').classList.add('hidden-field');
+                    document.getElementById('deptLeaderGroup').classList.add('hidden-field');
+                    document.getElementById('deptMembersGroup').classList.add('hidden-field');
+                    document.getElementById('externalDeptGroup').classList.add('hidden-field');
+                    await refreshProjectData(currentProjectId);
+                } else {
+                    // 后端返回错误
+                    console.error('节点保存失败:', result);
+                    alert('保存失败: ' + (result.message || '未知错误'));
+                }
+            } catch (e) {
+                // 网络或服务器错误
+                console.error('节点保存异常:', e);
+                alert('网络错误，请检查服务器是否运行');
+            }
         });
 
         function exportData() {
@@ -2182,7 +2011,7 @@ ${'─'.repeat(64)}
             showToast(`「${node.name}」已移至 ${newStartStr}`);
             dragNodeId = null;
             dragStartDate = null;
-            await selectProject(currentProjectId);
+            await refreshProjectData(currentProjectId);
         }
 
         function showToast(msg) {
