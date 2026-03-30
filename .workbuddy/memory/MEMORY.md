@@ -86,18 +86,36 @@
 - **权限已全部开通并验证成功**：日历读写、创建日程、删除日程、提醒设置
 
 ## 双机协作开发环境
-### M3 Ultra
+### M3 Ultra (Mac Studio M3 Ultra)
 - IP: 192.168.1.123
 - 用户: seth
 - 密码: 7335
-- 模型: Qwen3.5-397B-A17B-4bit (oMLX @ 端口 8001)
-- API Key: 123456
+- **本地模型**: Qwen3.5-397B-A17B-4bit (oMLX)
+  - 启动命令: `/Applications/oMLX.app/Contents/MacOS/python3 -m omlx.cli serve --base-path /Users/seth/.omlx --port 8001`
+  - API端点: `http://localhost:8001/v1`
+  - API Key: `123456`
+  - 日志文件: `~/.omlx/omlx-8001.log`
+  - 兼容OpenAI格式
 
-### AI Max
+### AI Max (Ubuntu 24.04)
 - IP: 192.168.1.238
 - 用户: seth
 - 密码: Sjm744546
-- 用途: 代码审查/校验
+- **本地模型**: Qwen3-72B-Instruct-Q5_K_M (llama.cpp)
+  - 启动命令: `~/llama-env/bin/python3 llm_server.py`
+  - API端点: `http://localhost:8080/v1`
+  - 日志文件: `/tmp/llm.log`
+  - 兼容OpenAI格式
+
+### SSH跳板连接
+- Mac mini跳板机: 100.99.135.88 (用户: seth, 密码: 7335)
+- 通过Mac mini连接内网机器:
+  ```bash
+  # 连接M3 Ultra
+  sshpass -p "7335" ssh seth@100.99.135.88 "sshpass -p '7335' ssh seth@192.168.1.123 ..."
+  # 连接AI Max
+  sshpass -p "7335" ssh seth@100.99.135.88 "sshpass -p 'Sjm744546' ssh seth@192.168.1.238 ..."
+  ```
 
 ### 腾讯云生产服务器
 - IP: 129.204.27.64
