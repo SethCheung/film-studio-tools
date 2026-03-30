@@ -4,4 +4,4 @@ backend/data/*.db
 backend/data/*.db-journal
 .env
 *.log
-.DS_Store
+.DS_Store.workbuddy/
