@@ -22,4 +22,4 @@ jobs:
           M3_ULTRA_MODEL: ${{ secrets.M3_ULTRA_MODEL }}
           M3_ULTRA_API_KEY: ${{ secrets.M3_ULTRA_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python .github/workflows/review_pr.py
+        run: python3 .github/workflows/review_pr.py
