@@ -3,6 +3,7 @@ const path = require('path');
 const { init } = require('./db/database');
 const projectsRouter = require('./routes/projects');
 const nodesRouter = require('./routes/nodes');
+const feishuRouter = require('./routes/feishu');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,8 +13,9 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // API 路由
-app.use('/api', nodesRouter);        // 节点路由（包含 /projects/:id/nodes）
+app.use('/api/nodes', nodesRouter);      // 节点路由（包含 /nodes/:id）
 app.use('/api/projects', projectsRouter); // 项目路由
+app.use('/api/feishu', feishuRouter);    // 飞书日历路由
 
 // 健康检查
 app.get('/api/health', (req, res) => {

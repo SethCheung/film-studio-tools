@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS nodes (
     leader TEXT,
     members TEXT DEFAULT '[]',
     note TEXT,
+    location TEXT,
+    feishu_event_id TEXT,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
